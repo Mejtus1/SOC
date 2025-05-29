@@ -1,0 +1,1029 @@
+YARA: 
+- pattern matching swiss knife for malware researchers
+
+Why does Malware use Strings?
+Malware, just like our "Hello World" application, uses strings to store textual data. 
+Here are a few examples of the data that various malware types store within strings:
+
+Type		Data							Description
+Ransomware	12t9YDPgwueZ9NyMgw519p7AA8isjr6SMw 			Bitcoin Wallet for ransom payments
+Botnet		12.34.56.7						The IP address of the Command and Control (C&C) server
+
+Using a Yara rule is simple. Every yara command requires two arguments to be valid, these are:
+1) The rule file we create
+2) Name of file, directory, or process ID to use the rule for.
+
+Using a Yara rule is simple. Every yara command requires two arguments to be valid, these are:
+1) The rule file we create
+2) Name of file, directory, or process ID to use the rule for.
+
+rule examplerule {
+condition: true
+}
+
+cmnatic@thm-yara:~$ ls
+go  myfirstrule.yar  somefile  suspicious-files  toolsyara-python
+cmnatic@thm-yara:~$ cat myfirstrule.yar 
+rule examplerule {
+condition: true
+}
+
+cmnatic@thm-yara:~$ ls 
+go  myfirstrule.yar  somefile  suspicious-files  toolsyara-python
+cmnatic@thm-yara:~$ yara myfirstrule.yar somefile 
+examplerule somefile
+cmnatic@thm-yara:~$ yara myfirstrule.yar sometextfile
+error scanning sometextfile: could not open file
+
+
+Simply, the rule we have made checks to see if the file/directory/PID that we specify exists via condition: true. If the file does exist, we are given the output of examplerule
+
+
+=====
+Yara Rules continued in more detail 
+
+Meta
+This section of a Yara rule is reserved for descriptive information by the author of the rule. For example, you can use desc, short for description, to summarise what your rule checks for. Anything within this section does not influence the rule itself. Similar to commenting code, it is useful to summarise your rule.
+
+
+Strings
+Remember our discussion about strings in Task 2? Well, here we go. You can use strings to search for specific text or hexadecimal in files or programs. For example, say we wanted to search a directory for all files containing "Hello World!", we would create a rule such as below:
+
+rule helloworld_checker{
+	strings:
+		$hello_world = "Hello World!"
+}
+
+We define the keyword Strings where the string that we want to search, i.e., "Hello World!" is stored within the variable $hello_world
+
+Of course, we need a condition here to make the rule valid. In this example, to make this string the condition, we need to use the variable's name. In this case, $hello_world:
+
+rule helloworld_checker{
+	strings:
+		$hello_world = "Hello World!"
+
+	condition:
+		$hello_world
+}
+
+Essentially, if any file has the string "Hello World!" then the rule will match. However, this is literally saying that it will only match if "Hello World!" is found and will not match if "hello world" or "HELLO WORLD."
+
+To solve this, the condition any of them allows multiple strings to be searched for, like below:
+
+rule helloworld_checker{
+	strings:
+		$hello_world = "Hello World!"
+		$hello_world_lowercase = "hello world"
+		$hello_world_uppercase = "HELLO WORLD"
+
+	condition:
+		any of them
+}
+
+Now, any file with the strings of:
+1. Hello World!
+2. hello world
+3. HELLO WORLD
+
+Will now trigger the rule.
+
+Conditions
+We have already used the true and any of them condition. Much like regular programming, you can use operators such as:
+
+<= (less than or equal to)
+>= (more than or equal to)
+!= (not equal to)
+
+For example, the rule below would do the following:
+
+rule helloworld_checker{
+	strings:
+		$hello_world = "Hello World!"
+
+	condition:
+        #hello_world <= 10
+}
+
+The rule will now:
+1. Look for the "Hello World!" string
+2. Only say the rule matches if there are less than or equal to ten occurrences of the "Hello World!" string
+
+
+Combining keywords
+
+Moreover, you can use keywords such as:
+
+and
+not
+or
+To combine multiple conditions. Say if you wanted to check if a file has a string and is of a certain size (in this example, the sample file we are checking is less than <10 kb and has "Hello World!" you can use a rule like below:
+
+rule helloworld_checker{
+	strings:
+		$hello_world = "Hello World!" 
+        
+        condition:
+	        $hello_world and filesize < 10KB 
+}
+
+=====
+Cockoo and Python PE module can be use to generate automatic YARA rules based even on behavior of malware
+- there are also LOKI, THOR and FENRIR for yara rules 
+
+Loki based YARA tools as of 17/04/2025
+airbnb_binaryalert.yar
+apt_aa19_024a.yar
+apt_agent_btz.yar
+apt_alienspy_rat.yar
+apt_apt10_redleaves.yar
+apt_apt10.yar
+apt_apt12_malware.yar
+apt_apt15.yar
+apt_apt17_mal_sep17.yar
+apt_apt17_malware.yar
+apt_apt19.yar
+apt_apt28_drovorub.yar
+apt_apt28.yar
+apt_apt29_grizzly_steppe.yar
+apt_apt30_backspace.yar
+apt_apt34.yar
+apt_apt37.yar
+apt_apt3_bemstour.yar
+apt_apt41.yar
+apt_apt6_malware.yar
+apt_ar18_165a.yar
+apt_area1_phishing_diplomacy.yar
+apt_aus_parl_compromise.yar
+apt_babyshark.yar
+apt_backdoor_ssh_python.yar
+apt_backspace.yar
+apt_beepservice.yar
+apt_between-hk-and-burma.yar
+apt_bigbang.yar
+apt_blackenergy_installer.yar
+apt_blackenergy.yar
+apt_bluetermite_emdivi.yar
+apt_bronze_butler.yar
+apt_buckeye.yar
+apt_carbon_paper_turla.yar
+apt_casper.yar
+apt_cheshirecat.yar
+apt_cloudatlas.yar
+apt_cloudduke.yar
+apt_cmstar.yar
+apt_cn_pp_zerot.yar
+apt_cn_reddelta.yar
+apt_cobaltstrike_evasive.yar
+apt_cobaltstrike.yar
+apt_codoso.yar
+apt_coreimpact_agent.yar
+apt_danti_svcmondr.yar
+apt_darkcaracal.yar
+apt_darkhydrus.yar
+apt_deeppanda.yar
+apt_derusbi.yar
+apt_dnspionage.yar
+apt_donotteam_ytyframework.yar
+apt_dragonfly.yar
+apt_dtrack.yar
+apt_dubnium.yar
+apt_duqu1_5_modules.yar
+apt_duqu2.yar
+apt_dustman.yar
+apt_emissary.yar
+apt_eqgrp_apr17.yar
+apt_eqgrp.yar
+apt_eternalblue_non_wannacry.yar
+apt_exile_rat.yar
+apt_f5_bigip_expl_payloads.yar
+apt_fakem_backdoor.yar
+apt_fancybear_computrace_agent.yar
+apt_fancybear_dnc.yar
+apt_fancybear_osxagent.yar
+apt_fidelis_phishing_plain_sight.yar
+apt_fin7_backdoor.yar
+apt_fin7.yar
+apt_flame2_orchestrator.yar
+apt_foudre.yar
+apt_four_element_sword.yar
+apt_freemilk.yar
+apt_furtim.yar
+apt_fvey_shadowbroker_dec16.yar
+apt_fvey_shadowbroker_jan17.yar
+apt_ghostdragon_gh0st_rat.yar
+apt_glassRAT.yar
+apt_golddragon.yar
+apt_goldenspy.yar
+apt_greenbug.yar
+apt_greyenergy.yar
+apt_grizzlybear_uscert.yar
+apt_hackingteam_rules.yar
+apt_ham_tofu_chches.yar
+apt_hatman.yar
+apt_hellsing_kaspersky.yar
+apt_hiddencobra_bankshot.yar
+apt_hiddencobra_wiper.yar
+apt_hidden_cobra.yar
+apt_hizor_rat.yar
+apt_hkdoor.yar
+apt_iamtheking.yar
+apt_icefog.yar
+apt_indetectables_rat.yar
+apt_industroyer.yar
+apt_inocnation.yar
+apt_irongate.yar
+apt_irontiger_trendmicro.yar
+apt_irontiger.yar
+apt_ism_rat.yar
+apt_kaspersky_duqu2.yar
+apt_ke3chang.yar
+apt_keyboys.yar
+apt_keylogger_cn.yar
+apt_khrat.yar
+apt_korplug_fast.yar
+apt_kwampirs.yar
+apt_laudanum_webshells.yar
+apt_lazarus_applejeus.yar
+apt_lazarus_aug20.yar
+apt_lazarus_dec17.yar
+apt_lazarus_jun18.yar
+apt_lazarus_vhd_ransomware.yar
+apt_leviathan.yar
+apt_lotusblossom_elise.yar
+apt_magichound.yar
+apt_microcin.yar
+apt_middle_east_talosreport.yar
+apt_miniasp.yar
+apt_minidionis.yar
+apt_mofang.yar
+apt_molerats_jul17.yar
+apt_monsoon.yar
+apt_moonlightmaze.yar
+apt_ms_platinum.yara
+apt_muddywater.yar
+apt_naikon.yar
+apt_nanocore_rat.yar
+apt_nazar.yar
+apt_ncsc_report_04_2018.yar
+apt_netwire_rat.yar
+apt_nk_gen.yar
+apt_oilrig_chafer_mar18.yar
+apt_oilrig_oct17.yar
+apt_oilrig_rgdoor.yar
+apt_oilrig.yar
+apt_olympic_destroyer.yar
+apt_onhat_proxy.yar
+apt_op_cleaver.yar
+apt_op_cloudhopper.yar
+apt_op_honeybee.yar
+apt_op_shadowhammer.yar
+apt_op_wocao.yar
+apt_passcv.yar
+apt_passthehashtoolkit.yar
+apt_patchwork.yar
+apt_plead_downloader.yar
+apt_plugx.yar
+apt_poisonivy_gen3.yar
+apt_poisonivy.yar
+apt_poseidon_group.yar
+apt_poshspy.yar
+apt_prikormka.yar
+apt_project_m.yar
+apt_project_sauron_extras.yar
+apt_project_sauron.yara
+apt_promethium_neodymium.yar
+apt_putterpanda.yar
+apt_quarkspwdump.yar
+apt_quasar_rat.yar
+apt_quasar_vermin.yar
+apt_rancor.yar
+apt_reaver_sunorcal.yar
+apt_rehashed_rat.yar
+apt_revenge_rat.yar
+apt_rocketkitten_keylogger.yar
+apt_rokrat.yar
+apt_royalroad.yar
+apt_ruag.yar
+apt_rwmc_powershell_creddump.yar
+apt_sakula.yar
+apt_sandworm_exim_expl.yar
+apt_saudi_aramco_phish.yar
+apt_scanbox_deeppanda.yar
+apt_scarcruft.yar
+apt_seaduke_unit42.yar
+apt_sednit_delphidownloader.yar
+apt_servantshell.yar
+apt_shadowpad.yar
+apt_shamoon2.yar
+apt_shamoon.yar
+apt_shellcrew_streamex.yar
+apt_sidewinder.yar
+apt_silence.yar
+apt_skeletonkey.yar
+apt_slingshot.yar
+apt_snaketurla_osx.yar
+apt_snowglobe_babar.yar
+apt_sofacy_cannon.yar
+apt_sofacy_dec15.yar
+apt_sofacy_fysbis.yar
+apt_sofacy_hospitality.yar
+apt_sofacy_jun16.yar
+apt_sofacy_oct17_camp.yar
+apt_sofacy_xtunnel_bundestag.yar
+apt_sofacy.yar
+apt_sofacy_zebrocy.yar
+apt_sphinx_moth.yar
+apt_stonedrill.yar
+apt_strider.yara
+apt_stuxnet.yar
+apt_stuxshop.yar
+apt_suckfly.yar
+apt_sysscan.yar
+apt_ta17_293A.yar
+apt_ta17_318A.yar
+apt_ta17_318B.yar
+apt_ta18_074A.yar
+apt_ta18_149A.yar
+apt_ta459.yar
+apt_telebots.yar
+apt_terracotta_liudoor.yar
+apt_terracotta.yar
+apt_threatgroup_3390.yar
+apt_thrip.yar
+apt_tick_datper.yar
+apt_tick_weaponized_usb.yar
+apt_tidepool.yar
+apt_tophat.yar
+apt_triton_mal_sshdoor.yar
+apt_triton.yar
+apt_turbo_campaign.yar
+apt_turla_gazer.yar
+apt_turla_kazuar.yar
+apt_turla_mosquito.yar
+apt_turla_neuron.yar
+apt_turla_penquin.yar
+apt_turla_png_dropper_nov18.yar
+apt_turla.yar
+apt_uboat_rat.yar
+apt_unit78020_malware.yar
+apt_uscert_ta17-1117a.yar
+apt_venom_linux_rootkit.yar
+apt_volatile_cedar.yar
+apt_vpnfilter.yar
+apt_waterbear.yar
+apt_waterbug.yar
+apt_webmonitor_rat.yar
+apt_webshell_chinachopper.yar
+apt_wildneutron.yar
+apt_wilted_tulip.yar
+apt_winnti_br.yar
+apt_winnti_burning_umbrella.yar
+apt_winnti_hdroot.yar
+apt_winnti_linux.yar
+apt_winnti_ms_report_201701.yar
+apt_winnti.yar
+apt_win_plugx.yar
+apt_woolengoldfish.yar
+apt_xrat.yar
+apt_zxshell.yar
+cn_pentestset_scripts.yar
+cn_pentestset_tools.yar
+cn_pentestset_webshells.yar
+crime_academic_data_centers_camp_may20.yar
+crime_andromeda_jun17.yar
+crime_antifw_installrex.yar
+crime_atm_dispenserxfs.yar
+crime_atm_javadipcash.yar
+crime_atm_loup.yar
+crime_atm_xfsadm.yar
+crime_atm_xfscashncr.yar
+crime_bad_patch.yar
+crime_badrabbit.yar
+crime_bazarbackdoor.yar
+crime_bernhard_pos.yar
+crime_bluenoroff_pos.yar
+crime_buzus_softpulse.yar
+crime_cmstar.yar
+crime_cn_campaign_njrat.yar
+crime_cn_group_btc.yar
+crime_cobalt_gang_pdf.yar
+crime_cobaltgang.yar
+crime_corkow_dll.yar
+crime_covid_ransom.yar
+crime_credstealer_generic.yar
+crime_cryptowall_svg.yar
+crime_dexter_trojan.yar
+crime_dridex_xml.yar
+crime_emotet.yar
+crime_enfal.yar
+crime_envrial.yar
+crime_eternalrocks.yar
+crime_evilcorp_dridex_banker.yar
+crime_fareit.yar
+crime_fireball.yar
+crime_floxif_flystudio.yar
+crime_goldeneye.yar
+crime_guloader.yar
+crime_h2miner_kinsing.yar
+crime_hermes_ransom.yar
+crime_kasper_oct17.yar
+crime_kins_dropper.yar
+crime_kraken_bot1.yar
+crime_kriskynote.yar
+crime_kr_malware.yar
+crime_locky.yar
+crime_loki_bot.yar
+crime_mal_grandcrab.yar
+crime_mal_nitol.yar
+crime_mal_ransom_wadharma.yar
+crime_malumpos.yar
+crime_malware_generic.yar
+crime_malware_set_oct16.yar
+crime_maze_ransomware.yar
+crime_mikey_trojan.yar
+crime_mirai.yar
+crime_mywscript_dropper.yar
+crime_nansh0u.yar
+crime_nkminer.yar
+crime_nopetya_jun17.yar
+crime_ole_loadswf_cve_2018_4878.yar
+crime_parallax_rat.yar
+crime_phish_gina_dec15.yar
+crime_ransom_generic.yar
+crime_ransom_germanwiper.yar
+crime_ransom_lockergoga.yar
+crime_ransom_prolock.yar
+crime_ransom_ragna_locker.yar
+crime_ransom_revil.yar
+crime_ransom_robinhood.yar
+crime_rat_parallax.yar
+crime_rombertik_carbongrabber.yar
+crime_ryuk_ransomware.yar
+crime_shifu_trojan.yar
+crime_snarasite.yar
+crime_teledoor.yar
+crime_trickbot.yar
+crime_upatre_oct15.yar
+crime_wannacry.yar
+crime_xbash.yar
+crime_zeus_panda.yar
+crime_zloader_maldocs.yar
+exploit_cve_2014_4076.yar
+exploit_cve_2015_1674.yar
+exploit_cve_2015_1701.yar
+exploit_cve_2015_2426.yar
+exploit_cve_2015_2545.yar
+exploit_cve_2015_5119.yar
+exploit_cve_2017_11882.yar
+exploit_cve_2017_8759.yar
+exploit_cve_2017_9800.yar
+exploit_cve_2018_0802.yar
+exploit_cve_2018_16858.yar
+exploit_rtf_ole2link.yar
+exploit_shitrix.yar
+exploit_uac_elevators.yar
+gen_ace_with_exe.yar
+gen_anomalies_keyword_combos.yar
+gen_armitage.yar
+gen_autocad_lsp_malware.yar
+gen_b374k_extra.yar
+gen_bad_pdf.yar
+gen_case_anomalies.yar
+gen_cert_payloads.yar
+gen_chaos_payload.yar
+gen_cmd_script_obfuscated.yar
+gen_cn_hacktool_scripts.yar
+gen_cn_hacktools.yar
+gen_cn_webshells.yar
+gen_crime_bitpaymer.yar
+gen_crimson_rat.yar
+gen_crunchrat.yar
+gen_dde_in_office_docs.yar
+gen_deviceguard_evasion.yar
+gen_dropper_pdb.yar
+gen_elf_file_anomalies.yar
+gen_empire.yar
+gen_enigma_protector.yar
+general_cloaking.yar
+general_officemacros.yar
+generic_anomalies.yar
+generic_cryptors.yar
+generic_dumps.yar
+generic_exe2hex_payload.yar
+gen_event_mute_hook.yar
+gen_Excel4Macro_Sharpshooter.yar
+gen_excel_auto_open_evasion.yar
+gen_excel_xll_addin_suspicious.yar
+gen_excel_xor_obfuscation_velvetsweatshop.yar
+gen_exploit_cve_2017_10271_weblogic.yar
+gen_faked_versions.yar
+gen_file_anomalies.yar
+gen_floxif.yar
+gen_gen_cactustorch.yar
+gen_google_anomaly.yar
+gen_gpp_cpassword.yar
+gen_hawkeye.yar
+gen_hta_anomalies.yar
+gen_hunting_susp_rar.yar
+gen_icon_anomalies.yar
+gen_impacket_tools.yar
+gen_invoke_mimikatz.yar
+gen_invoke_psimage.yar
+gen_invoke_thehash.yar
+gen_javascript_powershell.yar
+gen_kerberoast.yar
+gen_kirbi_mimkatz.yar
+gen_lnx_malware_indicators.yar
+gen_loaders.yar
+gen_macro_builders.yar
+gen_macro_ShellExecute_action.yar
+gen_macro_staroffice_suspicious.yar
+gen_mal_backnet.yar
+gen_mal_link.yar
+gen_mal_scripts.yar
+gen_malware_MacOS_plist_suspicious.yar
+gen_malware_set_qa.yar
+gen_merlin_agent.yar
+gen_metasploit_loader_rsmudge.yar
+gen_metasploit_payloads.yar
+gen_mimikatz.yar
+gen_mimikittenz.yar
+gen_mimipenguin.yar
+gen_nopowershell.yar
+gen_osx_backdoor_bella.yar
+gen_osx_evilosx.yar
+gen_osx_pyagent_persistence.yar
+gen_p0wnshell.yar
+gen_pirpi.yar
+gen_powerkatz.yar
+gen_powershdll.yar
+gen_powershell_empire.yar
+gen_powershell_invocation.yar
+gen_powershell_obfuscation.yar
+gen_powershell_suite.yar
+gen_powershell_susp.yar
+gen_powershell_toolkit.yar
+gen_powersploit_dropper.yar
+gen_ps1_shellcode.yar
+gen_ps_empire_eval.yar
+gen_ps_osiris.yar
+gen_pua.yar
+gen_pupy_rat.yar
+gen_python_pty_shell.yar
+gen_python_pyminifier_encoded_payload.yar
+gen_python_reverse_shell.yara
+gen_rar_exfil.yar
+gen_rats_malwareconfig.yar
+gen_recon_indicators.yar
+gen_redmimicry.yar
+gen_redsails.yar
+gen_regsrv32_issue.yar
+gen_rottenpotato.yar
+gen_sfx_with_microsoft_copyright.yar
+gen_sharpcat.yar
+gen_shikataganai.yar
+gen_sign_anomalies.yar
+gen_susp_cmd_var_expansion.yar
+gen_susp_hacktool.yar
+gen_suspicious_InPage_dropper.yar
+gen_suspicious_strings.yar
+gen_susp_lnk_files.yar
+gen_susp_lnk.yar
+gen_susp_obfuscation.yar
+gen_susp_office_dropper.yar
+gen_susp_sfx.yar
+gen_susp_strings_in_ole.yar
+gen_susp_wer_files.yar
+gen_susp_xor.yar
+gen_sysinternals_anomaly.yar
+gen_tempracer.yar
+gen_thumbs_cloaking.yar
+gen_transformed_strings.yar
+gen_tscookie_rat.yar
+gen_unicorn_obfuscated_powershell.yar
+gen_unspecified_malware.yar
+gen_url_persitence.yar
+gen_url_to_local_exe.yar
+gen_vhd_anomaly.yar
+gen_winpayloads.yar
+gen_win_privesc.yar
+gen_winshells.yar
+gen_wmi_implant.yar
+gen_xor_hunting.yar
+gen_xtreme_rat.yar
+gen_ysoserial_payloads.yar
+Linux.Ransomware.KillDisk.yara
+Linux.Ransomware.LuckyJoe.yara
+Linux.Virus.Vit.yara
+mal_avemaria_rat.yar
+mal_cryp_rat.yar
+mal_netsha.yar
+pua_cryptocoin_miner.yar
+pua_xmrig_monero_miner.yar
+pup_lightftp.yar
+spy_equation_fiveeyes.yar
+spy_querty_fiveeyes.yar
+spy_regin_fiveeyes.yar
+thor-hacktools.yar
+thor_inverse_matches.yar
+thor-webshells.yar
+threat_lenovo_superfish.yar
+vul_cve_2020_0688.yar
+vul_cve_2020_1938.yar
+vul_drivecrypt.yar
+vul_jquery_fileupload_cve_2018_9206.yar
+Win32.Downloader.dlMarlboro.yara
+Win32.Exploit.CVE20200601.yara
+Win32.Infostealer.MultigrainPOS.yara
+Win32.Infostealer.ProjectHookPOS.yara
+Win32.PUA.Domaiq.yara
+Win32.Ransomware.5ss5c.yara
+Win32.Ransomware.Afrodita.yara
+Win32.Ransomware.Ako.yara
+Win32.Ransomware.Alcatraz.yara
+Win32.Ransomware.Archiveus.yara
+Win32.Ransomware.Armage.yara
+Win32.Ransomware.ASN1Encoder.yara
+Win32.Ransomware.Atlas.yara
+Win32.Ransomware.Avaddon.yara
+Win32.Ransomware.BadBlock.yara
+Win32.Ransomware.Balaclava.yara
+Win32.Ransomware.BananaCrypt.yara
+Win32.Ransomware.BandarChor.yara
+Win32.Ransomware.BitCrypt.yara
+Win32.Ransomware.BKRansomware.yara
+Win32.Ransomware.Blitzkrieg.yara
+Win32.Ransomware.BrainCrypt.yara
+Win32.Ransomware.Buran.yara
+Win32.Ransomware.Clop.yara
+Win32.Ransomware.Cryakl.yara
+Win32.Ransomware.Crypmic.yara
+Win32.Ransomware.Crypren.yara
+Win32.Ransomware.CryptoBit.yara
+Win32.Ransomware.CryptoFortress.yara
+Win32.Ransomware.CryptoJoker.yara
+Win32.Ransomware.CryptoLocker.yara
+Win32.Ransomware.CryptoWall.yara
+Win32.Ransomware.Crysis.yara
+Win32.Ransomware.Cuba.yara
+Win32.Ransomware.Defray.yara
+Win32.Ransomware.Delphimorix.yara
+Win32.Ransomware.DenizKizi.yara
+Win32.Ransomware.DesuCrypt.yara
+Win32.Ransomware.Dharma.yara
+Win32.Ransomware.DirtyDecrypt.yara
+Win32.Ransomware.District.yara
+Win32.Ransomware.DMALocker.yara
+Win32.Ransomware.DMR.yara
+Win32.Ransomware.Dragon.yara
+Win32.Ransomware.Erica.yara
+Win32.Ransomware.Fantom.yara
+Win32.Ransomware.FCT.yara
+Win32.Ransomware.FenixLocker.yara
+Win32.Ransomware.Ferrlock.yara
+Win32.Ransomware.FLKR.yara
+Win32.Ransomware.GandCrab.yara
+Win32.Ransomware.GarrantyDecrypt.yara
+Win32.Ransomware.GhosTEncryptor.yara
+Win32.Ransomware.Gibon.yara
+Win32.Ransomware.GlobeImposter.yara
+Win32.Ransomware.Gomer.yara
+Win32.Ransomware.Good.yara
+Win32.Ransomware.Gpcode.yara
+Win32.Ransomware.GPGQwerty.yara
+Win32.Ransomware.HDDCryptor.yara
+Win32.Ransomware.HDMR.yara
+Win32.Ransomware.Hermes.yara
+Win32.Ransomware.Horsedeal.yara
+Win32.Ransomware.HydraCrypt.yara
+Win32.Ransomware.IFN643.yara
+Win32.Ransomware.Jamper.yara
+Win32.Ransomware.Jemd.yara
+Win32.Ransomware.JSWorm.yara
+Win32.Ransomware.JuicyLemon.yara
+Win32.Ransomware.Kangaroo.yara
+Win32.Ransomware.KawaiiLocker.yara
+Win32.Ransomware.KillDisk.yara
+Win32.Ransomware.Kovter.yara
+Win32.Ransomware.Kraken.yara
+Win32.Ransomware.Ladon.yara
+Win32.Ransomware.LeChiffre.yara
+Win32.Ransomware.LockBit.yara
+Win32.Ransomware.Lolkek.yara
+Win32.Ransomware.LooCipher.yara
+Win32.Ransomware.Mafia.yara
+Win32.Ransomware.Magniber.yara
+Win32.Ransomware.Makop.yara
+Win32.Ransomware.Maktub.yara
+Win32.Ransomware.Marlboro.yara
+Win32.Ransomware.MarsJoke.yara
+Win32.Ransomware.Matsnu.yara
+Win32.Ransomware.MedusaLocker.yara
+Win32.Ransomware.Montserrat.yara
+Win32.Ransomware.MZP.yara
+Win32.Ransomware.NanoLocker.yara
+Win32.Ransomware.Nefilim.yara
+Win32.Ransomware.Nemty.yara
+Win32.Ransomware.NotPetya.yara
+Win32.Ransomware.OphionLocker.yara
+Win32.Ransomware.Ouroboros.yara
+Win32.Ransomware.Outsider.yara
+Win32.Ransomware.Pacman.yara
+Win32.Ransomware.Paradise.yara
+Win32.Ransomware.Petya.yara
+Win32.Ransomware.PrincessLocker.yara
+Win32.Ransomware.PXJ.yara
+Win32.Ransomware.RagnarLocker.yara
+Win32.Ransomware.Ragnarok.yara
+Win32.Ransomware.Ransoc.yara
+Win32.Ransomware.RansomPlus.yara
+Win32.Ransomware.Retis.yara
+Win32.Ransomware.RetMyData.yara
+Win32.Ransomware.Reveton.yara
+Win32.Ransomware.Revil.yara
+Win32.Ransomware.Rokku.yara
+Win32.Ransomware.Ryuk.yara
+Win32.Ransomware.Sage.yara
+Win32.Ransomware.Satana.yara
+Win32.Ransomware.Satan.yara
+Win32.Ransomware.Saturn.yara
+Win32.Ransomware.Sepsis.yara
+Win32.Ransomware.Serpent.yara
+Win32.Ransomware.SevenSevenSeven.yara
+Win32.Ransomware.Sherminator.yara
+Win32.Ransomware.Sifrelendi.yara
+Win32.Ransomware.Sifreli.yara
+Win32.Ransomware.Sigrun.yara
+Win32.Ransomware.Spora.yara
+Win32.Ransomware.TBLocker.yara
+Win32.Ransomware.TeleCrypt.yara
+Win32.Ransomware.Termite.yara
+Win32.Ransomware.Teslacrypt.yara
+Win32.Ransomware.TorrentLocker.yara
+Win32.Ransomware.VegaLocker.yara
+Win32.Ransomware.Velso.yara
+Win32.Ransomware.VHDLocker.yara
+Win32.Ransomware.WannaCry.yara
+Win32.Ransomware.WildFire.yara
+Win32.Ransomware.Xorist.yara
+Win32.Ransomware.Zeppelin.yara
+Win32.Ransomware.ZeroCrypt.yara
+Win32.Ransomware.ZeroLocker.yara
+Win32.Ransomware.Zoldon.yara
+Win32.Trojan.Dridex.yara
+Win32.Trojan.Emotet.yara
+Win32.Trojan.TrickBot.yara
+Win32.Virus.Awfull.yara
+Win32.Virus.Cmay.yara
+Win32.Virus.DeadCode.yara
+Win32.Virus.Elerad.yara
+Win32.Virus.Greenp.yara
+Win32.Virus.Mocket.yara
+Win32.Virus.Negt.yara
+Win64.Ransomware.Ako.yara
+Win64.Ransomware.AwesomeScott.yara
+Win64.Ransomware.SeedLocker.yara
+yara_mixed_ext_vars.yar
+
+======
+Using LOKI on suspicious file: 
+cmnatic@thm-yara:~/tools/Loki/signature-base/yara$ ^C
+cmnatic@thm-yara:~/tools/Loki/signature-base/yara$ cd ..
+cmnatic@thm-yara:~/tools/Loki/signature-base$ ls 
+iocs  misc  yara
+cmnatic@thm-yara:~/tools/Loki/signature-base$ cd ..
+cmnatic@thm-yara:~/tools/Loki$ cd ..
+cmnatic@thm-yara:~/tools$ ls 
+Loki  yarGen
+cmnatic@thm-yara:~/tools$ cd ..
+cmnatic@thm-yara:~$ cd ../suspicious-files
+-bash: cd: ../suspicious-files: No such file or directory
+cmnatic@thm-yara:~$ cd ./suspicious-files/
+cmnatic@thm-yara:~/suspicious-files$ ls 
+file1  file2
+cmnatic@thm-yara:~/suspicious-files$ cd file1
+cmnatic@thm-yara:~/suspicious-files/file1$ python ../../tools/Loki/loki.py 
+-p
+usage: loki.py [-h] [-p path] [-s kilobyte] [-l log-file] [-r remote-loghos
+t]
+               [-t remote-syslog-port] [-a alert-level] [-w warning-level]
+               [-n notice-level] [--printall] [--allreasons] [--noprocscan]
+               [--nofilescan] [--nolevcheck] [--scriptanalysis] [--rootkit]
+               [--noindicator] [--reginfs] [--dontwait] [--intense] [--csv]
+               [--onlyrelevant] [--nolog] [--update] [--debug]
+               [--maxworkingset MAXWORKINGSET] [--syslogtcp]
+               [--logfolder log-folder] [--nopesieve] [--pesieveshellc]
+               [--nolisten] [--excludeprocess EXCLUDEPROCESS]
+loki.py: error: argument -p: expected one argument
+cmnatic@thm-yara:~/suspicious-files/file1$ python ../../tools/Loki/loki.py 
+-p .
+    __   ____  __ ______                            
+     / /  / __ \/ //_/  _/                            
+    / /__/ /_/ / ,< _/ /                              
+   /____/\____/_/|_/___/                              
+      ________  _____  ____                           
+     /  _/ __ \/ ___/ / __/______ ____  ___  ___ ____ 
+    _/ // /_/ / /__  _\ \/ __/ _ `/ _ \/ _ \/ -_) __/ 
+   /___/\____/\___/ /___/\__/\_,_/_//_/_//_/\__/_/    
+
+   Copyright by Florian Roth, Released under the GNU General Public License
+   Version 0.32.1
+  
+   DISCLAIMER - USE AT YOUR OWN RISK
+   Please report false positives via https://github.com/Neo23x0/Loki/issues
+  
+                                                                           
+    
+
+[NOTICE] Starting Loki Scan VERSION: 0.32.1 SYSTEM: thm-yara TIME: 20250417
+T12:18:22Z PLATFORM:     PROC: x86_64 ARCH: 64bit 
+[NOTICE] Registered plugin PluginWMI
+[NOTICE] Loaded plugin /home/cmnatic/tools/Loki/plugins/loki-plugin-wmi.py
+[NOTICE] PE-Sieve successfully initialized BINARY: /home/cmnatic/tools/Loki
+/tools/pe-sieve64.exe SOURCE: https://github.com/hasherezade/pe-sieve
+[INFO] File Name Characteristics initialized with 2841 regex patterns
+[INFO] C2 server indicators initialized with 1541 elements
+[INFO] Malicious MD5 Hashes initialized with 19034 hashes
+[INFO] Malicious SHA1 Hashes initialized with 7159 hashes
+[INFO] Malicious SHA256 Hashes initialized with 22841 hashes
+[INFO] False Positive Hashes initialized with 30 hashes
+[INFO] Processing YARA rules folder /home/cmnatic/tools/Loki/signature-base
+/yara
+[INFO] Initializing all YARA rules at once (composed string of all rule fil
+es)
+[INFO] Initialized 653 Yara rules
+[INFO] Reading private rules from binary ...
+[NOTICE] Program should be run as 'root' to ensure all access rights to pro
+cess memory and file objects.
+[NOTICE] Running plugin PluginWMI
+[NOTICE] Finished running plugin PluginWMI
+[INFO] Scanning . ...  
+[WARNING] 
+FILE: ./ind3x.php SCORE: 70 TYPE: PHP SIZE: 80992 
+FIRST_BYTES: 3c3f7068700a2f2a0a09623337346b20322e320a / <?php/*b374k 2.2 
+MD5: 1606bdac2cb613bf0b8a22690364fbc5 
+SHA1: 9383ed4ee7df17193f7a034c3190ecabc9000f9f 
+SHA256: 5479f8cd1375364770df36e5a18262480a8f9d311e8eedb2c2390ecb233852ad CR
+EATED: Mon Nov  9 15:15:32 2020 MODIFIED: Mon Nov  9 13:06:56 2020 ACCESSED
+: Thu Apr 17 12:18:25 2025 
+REASON_1: Yara Rule MATCH: webshell_metaslsoft SUBSCORE: 70 
+DESCRIPTION: Web Shell - file metaslsoft.php REF: - 
+MATCHES: Str1: $buff .= "<tr><td><a href=\\"?d=".$pwd."\\">[ $folder ]</a><
+/td><td>LINK</t
+[NOTICE] Results: 0 alerts, 1 warnings, 7 notices
+[RESULT] Suspicious objects detected!
+[RESULT] Loki recommends a deeper analysis of the suspicious objects.
+[INFO] Please report false positives via https://github.com/Neo23x0/signatu
+re-base
+[NOTICE] Finished LOKI Scan SYSTEM: thm-yara TIME: 20250417T12:18:25Z
+
+=====
+FILE2 LOKI output 
+
+cmnatic@thm-yara:~/suspicious-files$ cd file2
+cmnatic@thm-yara:~/suspicious-files/file2$ ls 
+1ndex.php
+cmnatic@thm-yara:~/suspicious-files/file2$ python ../../tools/Loki/loki.py 
+-p .
+                                                                           
+    
+      __   ____  __ ______                            
+     / /  / __ \/ //_/  _/                            
+    / /__/ /_/ / ,< _/ /                              
+   /____/\____/_/|_/___/                              
+      ________  _____  ____                           
+     /  _/ __ \/ ___/ / __/______ ____  ___  ___ ____ 
+    _/ // /_/ / /__  _\ \/ __/ _ `/ _ \/ _ \/ -_) __/ 
+   /___/\____/\___/ /___/\__/\_,_/_//_/_//_/\__/_/    
+
+   Copyright by Florian Roth, Released under the GNU General Public License
+   Version 0.32.1
+  
+   DISCLAIMER - USE AT YOUR OWN RISK
+   Please report false positives via https://github.com/Neo23x0/Loki/issues
+  
+                                                                           
+    
+
+[NOTICE] Starting Loki Scan VERSION: 0.32.1 SYSTEM: thm-yara TIME: 20250417
+T12:38:21Z PLATFORM:     PROC: x86_64 ARCH: 64bit 
+[NOTICE] Registered plugin PluginWMI
+[NOTICE] Loaded plugin /home/cmnatic/tools/Loki/plugins/loki-plugin-wmi.py
+[NOTICE] PE-Sieve successfully initialized BINARY: /home/cmnatic/tools/Loki
+/tools/pe-sieve64.exe SOURCE: https://github.com/hasherezade/pe-sieve
+[INFO] File Name Characteristics initialized with 2841 regex patterns
+[INFO] C2 server indicators initialized with 1541 elements
+[INFO] Malicious MD5 Hashes initialized with 19034 hashes
+[INFO] Malicious SHA1 Hashes initialized with 7159 hashes
+[INFO] Malicious SHA256 Hashes initialized with 22841 hashes
+[INFO] False Positive Hashes initialized with 30 hashes
+[INFO] Processing YARA rules folder /home/cmnatic/tools/Loki/signature-base
+/yara
+[INFO] Initializing all YARA rules at once (composed string of all rule fil
+es)
+[INFO] Initialized 653 Yara rules
+[INFO] Reading private rules from binary ...
+[NOTICE] Program should be run as 'root' to ensure all access rights to pro
+cess memory and file objects.
+[NOTICE] Running plugin PluginWMI
+[NOTICE] Finished running plugin PluginWMI
+[INFO] Scanning . ...  
+[NOTICE] Results: 0 alerts, 0 warnings, 7 notices
+[RESULT] SYSTEM SEEMS TO BE CLEAN.
+[INFO] Please report false positives via https://github.com/Neo23x0/signatu
+re-base
+[NOTICE] Finished LOKI Scan SYSTEM: thm-yara TIME: 20250417T12:38:29Z
+ 
+cmnatic@thm-yara:~/suspicious-files/file2$ strings 1ndex.php | wc -l
+3580
+- upon closer inspection the file which wasnt flagged by loki does have 3580 lines of strings 
+- yaraGen can be used in this task to automatically help with generating strings 
+
+
+python3 yarGen.py -m /home/cmnatic/suspicious-files/file2 --excludegood -o /home/cmnatic/suspicious-files/file2.yar
+
+A brief explanation of the parameters above:
+-m is the path to the files you want to generate rules for
+--excludegood force to exclude all goodware strings (these are strings found in legitimate software and can increase false positives)
+-o location & name you want to output the Yara rule
+
+UPDATE cmnatic@thm-yara:~/suspicious-files/file2$ cd ..
+cmnatic@thm-yara:~/suspicious-files$ cd .. 
+cmnatic@thm-yara:~$ ls 
+go  suspicious-files  tools  yara-python
+cmnatic@thm-yara:~$ cd tools/
+cmnatic@thm-yara:~/tools$ ls 
+Loki  yarGen
+cmnatic@thm-yara:~/tools$ cd yarGen/
+cmnatic@thm-yara:~/tools/yarGen$ python3 yarGen.py --update
+------------------------------------------------------------------------
+                   _____            
+    __ _____ _____/ ___/__ ___      
+   / // / _ `/ __/ (_ / -_) _ \     
+   \_, /\_,_/_/  \___/\__/_//_/     
+  /___/  Yara Rule Generator        
+         Florian Roth, July 2020, Version 0.23.3
+   
+  Note: Rules have to be post-processed
+  See this post for details: https://medium.com/@cyb3rops/121d29322282
+------------------------------------------------------------------------
+Downloading good-opcodes-part1.db from https://www.bsk-consulting.de/yargen
+/good-opcodes-part1.db ...
+Error while downloading the database file - check your Internet connection 
+(try to run it with --debug to see the full error message)
+cmnatic@thm-yara:~/tools/yarGen$ python3 yarGen.py --update
+------------------------------------------------------------------------
+                   _____            
+    __ _____ _____/ ___/__ ___      
+   / // / _ `/ __/ (_ / -_) _ \     
+   \_, /\_,_/_/  \___/\__/_//_/     
+  /___/  Yara Rule Generator        
+         Florian Roth, July 2020, Version 0.23.3
+   
+  Note: Rules have to be post-processed
+  See this post for details: https://medium.com/@cyb3rops/121d29322282
+------------------------------------------------------------------------
+Downloading good-opcodes-part1.db from https://www.bsk-consulting.de/yargen
+/good-opcodes-part1.db ...
+
+
+           [=] Generated 1 SIMPLE rules.
+           [=] All rules written to /home/cmnatic/suspicious-files/file2.yar
+           [+] yarGen run finished
+
+yara file2.yar file2/1ndex.php to test new rule aganst the file from before
+
+
+=====
+Upon examination of ind3x.php file in file1 thrugh Valhalla tool: 
+
+Keyword: 5479f8cd1375364770df36e5a18262480a8f9d311e8eedb2c2390ecb233852ad (Results: 7)	
+Query
+Keyword, Tag, ATT&CK Technique or Rule Name
+
+Type	Rule Name	Description	Date	Reference	Ref	VT	Info
+YARA	SUSP_ShellStorm_Shell_Feb23	Detects ShellStorm shells - different short reverse shells	2023-02-04	https://github.com/0bfxgh0st/ShellStorm			
+YARA	Webshell_b374k_Jan18_1	Detects hacktool / webshell found in disclosed hack tool set of Chinese APT group	2018-01-10	Internal Research - disclosed toolset web mirror			
+YARA	b374k_2_4_poly	Detects Webshell - file b374k-2.4.poly.php	2016-12-09	Webshell Repos			
+YARA	b374k_2_3_poly	Detects Webshell - file b374k-2.3.poly.php	2016-12-09	Webshell Repos			
+YARA	Operation_Emil_Webshell_b374k	Detetcs Webshell - file info2.php	2016-07-25	Operation Emil			
+YARA	metaslsoft	Detects Webshell - rule generated from file metaslsoft.php	2016-01-11	https://github.com/nikicat/web-malware-collection			
+YARA	Webshell_metaslsoft	Web Shell - file metaslsoft.php	2014-01-28	-
+
+cmnatic@thm-yara:~/suspicious-files$ tar -cf - file1 | sha256sum
+d196af1917ddc8bcb33f9deda895118d44bdc24ba6aa459f4a974981b01fc139  -
+cmnatic@thm-yara:~/suspicious-files$ 
+
+ sha256sum ind3x.php 
+5479f8cd1375364770df36e5a18262480a8f9d311e8eedb2c2390ecb233852ad  ind3x.php   <-------
+
+Same for file2: 
+
+cmnatic@thm-yara:~/suspicious-files/file2$ sha256sum 1ndex.php
+53fe44b4753874f079a936325d1fdc9b1691956a29c3aaf8643cdbd49f5984bf  1ndex.php
+
+YARA	WebshellRepo_convert	Detects Webshell - file convert.php	2016-12-09	Webshell Repos			
+YARA	Operation_Emil_Webshell_pluginsphp	Detects an Operation Emil Webshell - file plugins.php	2016-07-29	Operation Emil	
+YARA	Webshell_b374k_rule1	Detects b374k webshell	2015-10-16	https://github.com/b374k/b374k			
+YARA	Webshell_b374k_rule2	Detects b374k webshell	2015-10-16	https://github.com/b374k/b374k
+
