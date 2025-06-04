@@ -1,0 +1,184 @@
+SNORT RULES analysis 
+
+alert icmp any any <> any any (msg: "ICMP Packet found"; reference: CVE-XXXX; sid:1000001;rev:1;)
+                             |
+       Rule Header           |                          Rule Options 
+
+
+----------------------------------
+Action	
+
+Action 
+alert: Generate an alert and log the packet.
+log: Log the packet.
+drop: Block and log the packet.
+reject: Block the packet, log it and terminate the packet session. 
+
+Protocol	
+Protocol parameter identifies the type of the protocol that filtered for the rule.
+- Snort2 supports only four protocols filters in the rules (IP, TCP, UDP and ICMP)
+- you can detect the application flows using port numbers and options. 
+- if you want to detect FTP traffic, you cannot use FTP keyword in the protocol field but filter FTP traffic by investigating TCP traffic on port 21
+
+
+======================================================================================
+IP and Port Numbers
+
+- these parameters identify the source and destination IP addresses and associated port numbers filtered for the rule.
+
+IP Filtering	
+alert icmp 192.168.1.56 any <> any any  (msg: "ICMP Packet From "; sid: 100001; rev:1;)
+This rule will create an alert for each ICMP packet originating from the 192.168.1.56 IP address.
+
+Filter an IP range	
+alert icmp 192.168.1.0/24 any <> any any  (msg: "ICMP Packet Found"; sid: 100001; rev:1;)
+This rule will create an alert for each ICMP packet originating from the 192.168.1.0/24 subnet.
+
+Filter multiple IP ranges	
+alert icmp [192.168.1.0/24, 10.1.1.0/24] any <> any any  (msg: "ICMP Packet Found"; sid: 100001; rev:1;)
+This rule will create an alert for each ICMP packet originating from the 192.168.1.0/24 and 10.1.1.0/24 subnets.
+
+Exclude IP addresses/ranges	
+"negation operator" is used for excluding specific addresses and ports. Negation operator is indicated with "!"
+alert icmp !192.168.1.0/24 any <> any any  (msg: "ICMP Packet Found"; sid: 100001; rev:1;)
+This rule will create an alert for each ICMP packet not originating from the 192.168.1.0/24 subnet.
+
+Port Filtering	
+alert tcp any any <> any 21  (msg: "FTP Port 21 Command Activity Detected"; sid: 100001; rev:1;)
+This rule will create an alert for each TCP packet sent to port 21.
+
+Exclude a specific port	
+alert tcp any any <> any !21  (msg: "Traffic Activity Without FTP Port 21 Command Channel"; sid: 100001; rev:1;)
+This rule will create an alert for each TCP packet not sent to port 21.
+
+Filter a port range (Type 1)	
+alert tcp any any <> any 1:1024   (msg: "TCP 1-1024 System Port Activity"; sid: 100001; rev:1;)
+This rule will create an alert for each TCP packet sent to ports between 1-1024.
+
+Filter a port range (Type 2)	
+alert tcp any any <> any :1024   (msg: "TCP 0-1024 System Port Activity"; sid: 100001; rev:1;)
+This rule will create an alert for each TCP packet sent to ports less than or equal to 1024.
+
+Filter a port range (Type 3)	
+alert tcp any any <> any 1025: (msg: "TCP Non-System Port Activity"; sid: 100001; rev:1;)
+This rule will create an alert for each TCP packet sent to source port higher than or equal to 1025.
+
+Filter a port range (Type 4)	
+alert tcp any any <> any [21,23] (msg: "FTP and Telnet Port 21-23 Activity Detected"; sid: 100001; rev:1;)
+This rule will create an alert for each TCP packet sent to port 21 and 23.
+ 
+---------
+Direction
+
+- indicates traffic flow to be filtered by Snort
+- left side of the rule shows the source, and the right side shows the destination
+
+-> Source to destination flow.
+<> Bidirectional flow
+
+===========================================
+There are three main rule options in Snort;
+
+1. General Rule Options 
+- fundamental rule options for Snort
+
+2. Payload Rule Options 
+- rule options that help to investigate payload data
+- these options are helpful to detect specific payload patterns
+
+3. Non-Payload Rule Options 
+- rule options that focus on non-payload data 
+- these options will help create specific patterns and identify network issues
+
+
+-----------------------
+1. General Rule Options
+
+Msg	
+- The message field is a basic prompt and quick identifier of the rule. 
+- Once the rule is triggered, the message filed will appear in the console or log. Usually, the message part is a one-liner that summarises the event.
+
+Sid	
+- Snort rule IDs (SID) come with a pre-defined scope, and each rule must have a SID in a proper format. 
+- There are three different scopes for SIDs shown below.
+
+<100: Reserved rules
+100-999,999: Rules came with the build.
+>=1,000,000: Rules created by user.
+- rules we will create should have sid greater than 100.000.000
+- Another important point is SIDs should not overlap, and each id must be unique
+
+Reference
+- each rule can have additional information or reference to explain purpose of rule or threat pattern
+- that could be Common Vulnerabilities and Exposures (CVE) id or external information
+- having references for rules will always help analysts during alert and incident investigation
+
+Rev	
+- Snort rules can be modified and updated for performance and efficiency issues 
+- rev option help analysts to have revision information of each rule
+- it will be easy to understand rule improvements
+- each rule has its unique rev number, and there is no auto-backup feature on rule history
+- analysts should keep rule history themselves
+- rev option is onl indicator of how many times rule had revisions
+
+alert icmp any any <> any any (msg: "ICMP Packet Found"; sid: 100001; reference:cve,CVE-XXXX; rev:1;)
+
+---------------------------------
+2. Payload Detection Rule Options
+
+a) Content	
+- payload data
+- it matches specific payload data by ASCII, HEX or both
+- it is possible to use this option multiple times in a single rule
+- more you create specific pattern match features, the more it takes time to investigate packet
+
+Following rules will create an alert for each HTTP packet containing the keyword "GET". This rule option is case sensitive!
+ASCII mode - alert tcp any any <> any 80  (msg: "GET Request Found"; content:"GET"; sid: 100001; rev:1;)
+HEX mode - alert tcp any any <> any 80  (msg: "GET Request Found"; content:"|47 45 54|"; sid: 100001; rev:1;)
+
+b) Nocase	
+- disabling case sensitivity
+- used for enhancing content searches
+alert tcp any any <> any 80  (msg: "GET Request Found"; content:"GET"; nocase; sid: 100001; rev:1;)
+
+c) Fast_pattern
+- prioritise content search to speed up payload search operation
+- by default, Snort uses biggest content and evaluates it against rules
+- "fast_pattern" option helps you select initial packet match with specific value for further investigation
+- this option always works case insensitive and can be used once per rule
+- note that this option is required when using multiple "content" options
+
+The following rule has two content options, and the fast_pattern option tells to snort to use the first content option (in this case, "GET") for the initial packet match.
+
+alert tcp any any <> any 80  (msg: "GET Request Found"; content:"GET"; fast_pattern; content:"www";  sid:100001; rev:1;)
+
+-------------------------------------
+3. Non-Payload Detection Rule Options
+
+- there are rule options that focus on non-payload data
+- these options will help create specific patterns and identify network issues
+
+ID	
+Filtering the IP id field.
+alert tcp any any <> any any (msg: "ID TEST"; id:123456; sid: 100001; rev:1;)
+
+Flags	
+- filtering TCP flags
+F - FIN
+S - SYN
+R - RST
+P - PSH
+A - ACK
+U - URG
+alert tcp any any <> any any (msg: "FLAG TEST"; flags:S;  sid: 100001; rev:1;)
+
+Dsize	
+- filtering packet payload size
+dsize:min<>max;
+dsize:>100
+dsize:<100
+alert ip any any <> any any (msg: "SEQ TEST"; dsize:100<>300;  sid: 100001; rev:1;)
+
+Sameip	
+Filtering the source and destination IP addresses for duplication.
+alert ip any any <> any any (msg: "SAME-IP TEST";  sameip; sid: 100001; rev:1;)
