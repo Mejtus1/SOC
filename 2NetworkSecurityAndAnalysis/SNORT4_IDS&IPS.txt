@@ -1,0 +1,200 @@
+SNORT IDS/IPS MODE 
+IDS/IPS mode depends on the rules and configuration
+
+Parameter	Description
+-c		Defining the configuration file.
+-T		Testing the configuration file.
+-N		Disable logging.
+-D		Background mode.
+-A		Alert modes;
+		full: Full alert mode, providing all possible information about the alert. This one also is the default mode; once you use -A and don't 		specify any mode, snort uses this mode.
+		fast:  Fast mode shows the alert message, timestamp, source and destination IP, along with port numbers.
+		console: Provides fast style alerts on the console screen.
+		cmg: CMG style, basic header details with payload in hex and text format.
+		none: Disabling alerting.
+
+
+--------------------------------------
+start snort and test configuration file 
+
+sudo snort -c /etc/snort/snort.conf -T
+Running in Test mode
+
+        --== Initializing Snort ==--
+Initializing Output Plugins!
+Initializing Preprocessors!
+Initializing Plug-ins!
+Parsing Rules file "/etc/snort/snort.conf"
+PortVar 'HTTP_PORTS' defined :  [ 80:81 311 383 591 593 901 1220 1414 1741 1830 2301 2381 2809 3037 3128 3702 4343 4848 5250 6988 7000:7001 7144:7145 7510 7777 7779 8000 8008 8014 8028 8080 8085 8088 8090 8118 8123 8180:8181 8243 8280 8300 8800 8888 8899 9000 9060 9080 9090:9091 9443 9999 11371 34443:34444 41080 50002 55555 ]
+...........................
+  Preprocessor Object: SF_SMTP  Version 1.1  <Build 9>
+           Preprocessor Object: SF_IMAP  Version 1.0  <Build 1>
+           Preprocessor Object: SF_SIP  Version 1.1  <Build 1>
+           Preprocessor Object: SF_SSLPP  Version 1.1  <Build 4>
+
+Snort successfully validated the configuration!
+Snort exiting
+
+
+--------------------------------------
+IDS/IPS mode with parameter "-N"
+- disable logging by running the following command: 
+	sudo snort -c /etc/snort/snort.conf -N
+
+
+--------------------------------------
+IDS/IPS mode with parameter "-D"
+
+user@ubuntu$ sudo snort -c /etc/snort/snort.conf -D
+
+Spawning daemon child...
+My daemon child 2898 lives...
+Daemon parent exiting (0)
+
+- if you activate verbosity (-v) or full packet dump (-X) with packet logger mode (-l) you will still have logs in logs folder, but there will be no output in console
+
+ps -ef | grep snort
+root        1946       1  0 10:28 ?        00:00:00 snort -c /etc/snort/snort.co
+
+- we can also kill the process 
+ps -ef | grep snort
+root        1946       1  0 10:28 ?        00:00:00 snort -c /etc/snort/snort.conf -D
+ubuntu      1950    1785  0 10:29 pts/1    00:00:00 grep --color=auto snort
+ubuntu@ip-10-10-152-18:~$ ^C
+ubuntu@ip-10-10-152-18:~$ sudo kill -9 1946
+ubuntu@ip-10-10-152-18:~$ ps -ef | grep snort
+ubuntu      1956    1785  0 10:30 pts/1    00:00:00 grep --color=auto snort
+ubuntu@ip-10-10-152-18:~$ 
+
+--------------------------------
+IDS/IPS mode with parameter "-A"
+
+- these parameters don't provide console output, so we will continue to identify the differences through log formats
+
+alert modes available in snort;
+console: 		Provides fast style alerts on the console screen.
+cmg: 			Provides basic header details with payload in hex and text format.
+full: 			Full alert mode, providing all possible information about the alert.
+fast: 			Fast mode, shows the alert message, timestamp, source and destination ıp along with port numbers.
+none: 			Disabling alerting.
+
+
+sudo snort -c /etc/snort/snort.conf -A console
+
+
+user@ubuntu$ sudo snort -c /etc/snort/snort.conf -A console
+Running in IDS mode
+
+        --== Initializing Snort ==--
+Initializing Output Plugins!
+Initializing Preprocessors!
+Initializing Plug-ins!
+Parsing Rules file "/etc/snort/snort.conf"
+...
+Commencing packet processing (pid=3743)
+12/12-02:08:27.577495  [**] [1:366:7] ICMP PING *NIX [**] [Classification: Misc activity] [Priority: 3] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:27.577495  [**] [1:10000001:0] ICMP Packet found [**] [Priority: 0] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:27.577495  [**] [1:384:5] ICMP PING [**] [Classification: Misc activity] [Priority: 3] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:27.609719  [**] [1:10000001:0] ICMP Packet found [**] [Priority: 0] {ICMP} 142.250.187.110 -> 192.168.175.129
+^C*** Caught Int-Signal
+12/12-02:08:29.595898  [**] [1:366:7] ICMP PING *NIX [**] [Classification: Misc activity] [Priority: 3] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:29.595898  [**] [1:10000001:0] ICMP Packet found [**] [Priority: 0] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:29.595898  [**] [1:384:5] ICMP PING [**] [Classification: Misc activity] [Priority: 3] {ICMP} 192.168.175.129 -> 142.250.187.110
+===============================================================================
+Run time for packet processing was 26.25844 seconds
+Snort processed 88 packets.
+
+----------------------------------------
+IDS/IPS mode with parameter "-A console"
+
+sudo snort -c /etc/snort/snort.conf -A console
+
+user@ubuntu$ sudo snort -c /etc/snort/snort.conf -A console
+Running in IDS mode
+
+        --== Initializing Snort ==--
+Initializing Output Plugins!
+Initializing Preprocessors!
+Initializing Plug-ins!
+Parsing Rules file "/etc/snort/snort.conf"
+...
+Commencing packet processing (pid=3743)
+12/12-02:08:27.577495  [**] [1:366:7] ICMP PING *NIX [**] [Classification: Misc activity] [Priority: 3] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:27.577495  [**] [1:10000001:0] ICMP Packet found [**] [Priority: 0] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:27.577495  [**] [1:384:5] ICMP PING [**] [Classification: Misc activity] [Priority: 3] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:27.609719  [**] [1:10000001:0] ICMP Packet found [**] [Priority: 0] {ICMP} 142.250.187.110 -> 192.168.175.129
+^C*** Caught Int-Signal
+12/12-02:08:29.595898  [**] [1:366:7] ICMP PING *NIX [**] [Classification: Misc activity] [Priority: 3] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:29.595898  [**] [1:10000001:0] ICMP Packet found [**] [Priority: 0] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:08:29.595898  [**] [1:384:5] ICMP PING [**] [Classification: Misc activity] [Priority: 3] {ICMP} 192.168.175.129 -> 142.250.187.110
+===============================================================================
+Run time for packet processing was 26.25844 seconds
+Snort processed 88 packets.
+
+
+-------------------------------------------
+IDS/IPS mode with parameter "-A cmg"
+
+user@ubuntu$ sudo snort -c /etc/snort/snort.conf -A cmg
+Running in IDS mode
+
+        --== Initializing Snort ==--
+Initializing Output Plugins!
+Initializing Preprocessors!
+Initializing Plug-ins!
+Parsing Rules file "/etc/snort/snort.conf"
+...
+Commencing packet processing (pid=3743)
+12/12-02:23:56.944351  [**] [1:366:7] ICMP PING *NIX [**] [Classification: Misc activity] [Priority: 3] {ICMP} 192.168.175.129 -> 142.250.187.110
+12/12-02:23:56.944351 00:0C:29:A5:B7:A2 -> 00:50:56:E1:9B:9D type:0x800 len:0x62
+192.168.175.129 -> 142.250.187.110 ICMP TTL:64 TOS:0x0 ID:10393 IpLen:20 DgmLen:84 DF
+Type:8  Code:0  ID:4   Seq:1  ECHO
+BC CD B5 61 00 00 00 00 CE 68 0E 00 00 00 00 00  ...a.....h......
+10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F  ................
+20 21 22 23 24 25 26 27 28 29 2A 2B 2C 2D 2E 2F   !"#$%&'()*+,-./
+30 31 32 33 34 35 36 37                          01234567
+
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+-------------------------------------
+IDS/IPS mode with parameter "-A fast"
+
+user@ubuntu$ sudo snort -c /etc/snort/snort.conf -A fast
+Running in IDS mode
+
+        --== Initializing Snort ==--
+Initializing Output Plugins!
+Initializing Preprocessors!
+Initializing Plug-ins!
+Parsing Rules file "/etc/snort/snort.conf"
+...
+Commencing packet processing (pid=3743)
+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+
+-------------------------------------
+IDS/IPS mode with parameter "-A full"
+
+user@ubuntu$ sudo snort -c /etc/snort/snort.conf -A full
+Running in IDS mode
+
+        --== Initializing Snort ==--
+Initializing Output Plugins!
+Initializing Preprocessors!
+Initializing Plug-ins!
+Parsing Rules file "/etc/snort/snort.conf"
+...
+Commencing packet processing (pid=3744)
+
+-------------------------------------
+IDS/IPS mode with parameter "-A none"
+
+user@ubuntu$ sudo snort -c /etc/snort/snort.conf -A none
+Running in IDS mode
+
+        --== Initializing Snort ==--
+Initializing Output Plugins!
+Initializing Preprocessors!
+Initializing Plug-ins!
+Parsing Rules file "/etc/snort/snort.conf"
+...
+Commencing packet processing (pid=3745)
