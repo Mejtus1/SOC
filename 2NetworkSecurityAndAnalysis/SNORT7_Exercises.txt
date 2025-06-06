@@ -1,0 +1,46 @@
+Snort exercises 
+
+-----------------------------------------------
+rule 1: 
+
+alert ip any any <> any any (msg:"ID35369";id:35369;sid:1000010; rev:1;)
+
+snort -c local.rules -A full -l . -r task9.pcap
+
+ubuntu@ip-10-10-6-138:~/Desktop/Task-Exercises/Exercise-Files/TASK-9$ cat alert
+[**] [1:1000012:1] ID35369 [**]
+[Priority: 0] 
+03/03-20:00:32.042975 192.168.121.2 -> 192.168.120.1
+ICMP TTL:255 TOS:0x0 ID:35369 IpLen:20 DgmLen:40
+Type:13  Code:0  ID: 7  Seq: 6  TIMESTAMP REQUEST
+
+[**] [1:1000010:1] ID35369 [**]
+[Priority: 0] 
+03/03-20:00:32.042975 192.168.121.2 -> 192.168.120.1
+ICMP TTL:255 TOS:0x0 ID:35369 IpLen:20 DgmLen:40
+Type:13  Code:0  ID: 7  Seq: 6  TIMESTAMP REQUEST
+
+
+-----------------------------------------------
+rule 2: 
+
+alert tcp any any <> any any (msg: "FLAG TEST"; flags:S;  sid: 100001; rev:1;)
+
+snort -c local.rules -A full -l . -r task9.pcap
+
+[**] [1:100001:1] FLAG TEST [**]
+[Priority: 0] 
+03/03-20:02:09.464106 2003:51:6012:110::b15:22:60892 -> 2003:51:6012:121::2:22
+TCP TTL:62 TOS:0x0 ID:0 IpLen:40 DgmLen:80
+******S* Seq: 0xB82637E7  Ack: 0x0  Win: 0x7080  TcpLen: 40
+TCP Options (5) => MSS: 1440 SackOK TS: 166450886 0 NOP WS: 7 
+
+-----------------------------------------------
+rule 3: (Ack Syn flag)
+
+alert tcp any any <> any any (msg: "FLAG TEST"; flags:SA;  sid: 100001; rev:1;)
+
+-----------------------------------------------
+rule 4: (same IP with UDP protocol)
+
+alert udp any any <> any any (msg: "SAME-IP TEST";  sameip; sid: 100001; rev:1;)
