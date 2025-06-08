@@ -1,0 +1,120 @@
+SNORT exercises 2
+
+==============
+IDS RULES HTTP 
+
+----------
+Question 1
+Write a rule to detect all TCP packets from or to port 80.   = alert tcp any 80 <> any any (msg:"tcp-traffic";sid:1000001;rev:1;)
+
+What is the number of detected packets you got?              = 164 TCP packets
+
+sudo snort -r mx-3.pcap -c local.rules -A full -l . = executing SNORT at our file 
+
+---------
+Question2 
+What is the destination address of packet 63? = 216.239.59.99
+
+sudo snort -r snort.log.1745925874 -n 63
+
+WARNING: No preprocessors configured for policy 0.
+05/13-10:17:10.295515 145.254.160.237:3371 -> 216.239.59.99:80
+TCP TTL:128 TOS:0x0 ID:3917 IpLen:20 DgmLen:761 DF
+***AP*** Seq: 0x36C21E28  Ack: 0x2E6B5384  Win: 0x2238  TcpLen: 20
+
+----------
+Question 3
+What is the ACK number of packet 64? = 0x2E6B5384
+What is the source IP of packet 65? = 145.254.160.237
+What is the source port of packet 65? = 3372 
+
+sudo snort -r snort.log.1745925874 -n 65
+
+packet 65: 
+WARNING: No preprocessors configured for policy 0.
+05/13-10:17:10.325558 145.254.160.237:3372 -> 65.208.228.223:80
+TCP TTL:128 TOS:0x0 ID:3918 IpLen:20 DgmLen:40 DF
+***A**** Seq: 0x38AFFFF3  Ack: 0x114C81E4  Win: 0x25BC  TcpLen: 20
+
+packet 64: 
+WARNING: No preprocessors configured for policy 0.
+05/13-10:17:10.295515 145.254.160.237:3371 -> 216.239.59.99:80
+TCP TTL:128 TOS:0x0 ID:3917 IpLen:20 DgmLen:761 DF
+***AP*** Seq: 0x36C21E28  Ack: 0x2E6B5384  Win: 0x2238  TcpLen: 20
+
+
+=============
+IDS rules FTP 
+
+----------
+Question 1 
+
+alert tcp any 21 <> any any (msg:"TCP port 21 traffic"; sid:1000002; rev:1;)     = rule 
+sudo snort -r ftp-png-gif.pcap -c local.rules -l . ()                            = terminal command 
+to read outputted snort file 
+
+sudo snort -r snort.log.1745926847
+
+What is the number of detected packets? = 307 
+
+Packet I/O Totals:
+   Received:          307
+
+----------
+Question 2
+
+What is the name of the FTP service ? = Microsoft FTP Service
+
+sudo strings snort.log.1745926847 = terminal command to output strings from the log file (easier to find exact sting) 
+
+----------
+Question 3
+
+Write a rule to detect failed FTP login attempts in the given pcap. = alert tcp any 21 <> any any (msg:"failed-FTP-login";content:"530";sid:1000003; rev:1;>
+Each failed FTP login attempt prompts a default message with the pattern; "530 User" 
+What is the number of detected packets? = 41 
+
+Action Stats:
+     Alerts:           41 (  9.739%)
+
+----------
+Question 4 
+
+default message with the pattern; "230 User"
+Write a rule to detect successful FTP logins in the given pcap. = alert tcp any 21 <> any any (msg:"successful-FTP-login";content:"230";sid:100>
+
+What is the number of detected packets? = 1 
+
+----------
+Question 5 
+
+Write a rule to detect FTP login attempts with a valid username. = alert tcp any 21 <> any any (msg:"login-attempt";content:"331";sid:1000004;rev:1;) 
+
+What is the number of detected packets ? = 42 
+
+----------
+Question 6 
+
+Write a rule to detect FTP login attempts with the "Administrator" username but no password entered yet. (331 is login attempt without passport so combine 331 with Administrator string in two separate usernames): alert tcp any 21 <> any any (msg:"login-Administrator";content:"Administrator";content:"331";sid:1000005;rev:1;)
+
+Alerts: 7 
+
+
+WHOLE FILE from questions 1 - 6 
+# ----------------
+# LOCAL RULES
+# ----------------
+# This file intentionally does not come with signatures.  Put your local
+# additions here.
+
+# alert tcp any 21 <> any any (msg:"TCP port 21 traffic"; sid:1000002; rev:1;)
+
+# alert tcp any 21 <> any any (msg:"failed-FTP-login";content:"530";sid:1000003;rev:1;)
+
+# alert tcp any 21 <> any any (msg:"successful-FTP-login";content:"230";sid:1000003;rev:1;)
+
+# alert tcp any 21 <> any any (msg:"login-attempt";content:"331";sid:1000004;rev:1;)
+
+alert tcp any 21 <> any any (msg:"login-Administrator";content:"Administrator";content:"331") 
+
+
