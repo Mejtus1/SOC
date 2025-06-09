@@ -1,0 +1,190 @@
+SNORT training scenario 
+
+- capture traffic in IDS mode and create log file which can be later analyzed and based on data from log file created rules that will be inputted into /etc/snort/rules/local.rules
+
+sudo snort -v -l . 
+- run snort in sniffer mode and create log file in current directory based on which we can later create conclusions and rules if it will be enough data to conclude one 
+
+sudo snort -r snort.log.1845784521477 
+
+04/30-07:17:31.638530 10.10.140.29:22 -> 10.10.245.36:46598
+TCP TTL:64 TOS:0x0 ID:64863 IpLen:20 DgmLen:52 DF
+***A**** Seq: 0xCC6A06C  Ack: 0xEFEFA4E  Win: 0x1E3  TcpLen: 32
+TCP Options (3) => NOP NOP TS: 4119681297 1884573866 
+0x0000: 02 67 7A 27 40 23 02 6D 84 B4 B4 1B 08 00 45 00  .gz'@#.m......E.
+0x0010: 00 34 FD 5F 40 00 40 06 A8 0E 0A 0A 8C 1D 0A 0A  .4._@.@.........
+0x0020: F5 24 00 16 B6 06 0C C6 A0 6C 0E FE FA 4E 80 10  .$.......l...N..
+0x0030: 01 E3 95 7C 00 00 01 01 08 0A F5 8D 59 11 70 54  ...|........Y.pT
+0x0040: 50 AA                                            P.
+
+- example of reoccurring packet which can be seen on port 22 = ssh 
+
+sudo snort -r snort.log.1845784521477 -X | grep :22
+
+04/30-07:17:31.448093 10.10.140.29:22 -> 10.10.245.36:46598
+04/30-07:17:31.466351 10.10.245.36:46598 -> 10.10.140.29:22
+04/30-07:17:31.482390 10.10.140.29:22 -> 10.10.245.36:46598
+04/30-07:17:31.538335 10.10.140.29:22 -> 10.10.245.36:46598
+04/30-07:17:31.558377 10.10.245.36:46598 -> 10.10.140.29:22
+04/30-07:17:31.558390 10.10.140.29:22 -> 10.10.245.36:46598
+04/30-07:17:31.578441 10.10.245.36:46598 -> 10.10.140.29:22
+04/30-07:17:31.585370 10.10.140.29:22 -> 10.10.245.36:46598
+04/30-07:17:31.604245 10.10.140.29:22 -> 10.10.245.36:46598
+04/30-07:17:31.625690 10.10.245.36:46598 -> 10.10.140.29:22
+04/30-07:17:31.638530 10.10.140.29:22 -> 10.10.245.36:46598
+04/30-07:17:31.662614 10.10.140.29:22 -> 10.10.245.36:46598
+04/30-07:17:31.682672 10.10.140.29:22 -> 10.10.245.36:46584
+04/30-07:17:31.702668 10.10.140.29:22 -> 10.10.245.36:46586
+04/30-07:17:31.716905 10.10.245.36:46598 -> 10.10.140.29:22
+04/30-07:17:31.734710 10.10.140.29:22 -> 10.10.245.36:46598
+04/30-07:17:31.738013 10.10.245.36:46584 -> 10.10.140.29:22
+
+sudo snort -r snort.log.18456891891817 -X | grep :80
+
+04/30-07:17:31.682653 10.100.1.56:53902 -> 10.10.121.199:80
+04/30-07:17:31.716307 10.100.1.56:53902 -> 10.10.121.199:80
+04/30-07:17:31.716865 10.10.121.199:80 -> 10.100.1.56:53902
+04/30-07:17:31.717121 10.100.1.56:53902 -> 10.10.121.199:80
+04/30-07:17:31.719627 10.100.1.56:53902 -> 10.10.121.199:80
+04/30-07:17:31.719995 10.10.121.199:80 -> 10.100.1.56:53902
+04/30-07:17:31.736330 10.100.1.56:53902 -> 10.10.121.199:80
+04/30-07:17:31.754771 10.100.1.56:53902 -> 10.10.121.199:80
+
+- there is 2 times less normal traffic on port 80 than ssh on port 22 which is quite concerning in this scenario and out of normal bounds 
+
+sudo snort -r snort.log.19894819891891 -X | grep "ssh" 
+
+0x0070: 62 73 73 68 2E 6F 72 67 2C 65 63 64 68 2D 73 68  bssh.org,ecdh-sh <-- ssh
+0x00E0: 72 74 2D 76 30 31 40 6F 70 65 6E 73 73 68 2E 63  rt-v01@openssh.c <-- ssh
+0x0100: 63 65 72 74 2D 76 30 31 40 6F 70 65 6E 73 73 68  cert-v01@openssh <-- ssh
+0x0110: 2E 63 6F 6D 2C 73 73 68 2D 72 73 61 2D 63 65 72  .com,ssh-rsa-cer <-- ssh
+0x0120: 74 2D 76 30 31 40 6F 70 65 6E 73 73 68 2E 63 6F  t-v01@openssh.co <-- ssh
+0x0130: 6D 2C 73 73 68 2D 64 73 73 2D 63 65 72 74 2D 76  m,ssh-dss-cert-v <-- ssh
+0x0140: 30 31 40 6F 70 65 6E 73 73 68 2E 63 6F 6D 2C 65  01@openssh.com,e <-- ssh
+0x0170: 73 73 68 2E 63 6F 6D 2C 65 63 64 73 61 2D 73 68  ssh.com,ecdsa-sh <-- ssh
+0x0190: 2D 76 30 31 40 6F 70 65 6E 73 73 68 2E 63 6F 6D  -v01@openssh.com <-- ssh
+0x01C0: 65 6E 73 73 68 2E 63 6F 6D 2C 73 73 68 2D 65 64  enssh.com,ssh-ed <-- ssh
+0x01E0: 70 65 6E 73 73 68 2E 63 6F 6D 2C 65 63 64 73 61  penssh.com,ecdsa <-- ssh
+0x0240: 2C 73 73 68 2D 72 73 61 2C 73 73 68 2D 64 73 73  ,ssh-rsa,ssh-dss
+0x0250: 2C 73 73 68 2D 65 64 32 35 35 31 39 00 00 00 55  ,ssh-ed25519...U
+0x0280: 70 6F 6C 79 31 33 30 35 40 6F 70 65 6E 73 73 68  poly1305@openssh
+0x02C0: 67 63 6D 40 6F 70 65 6E 73 73 68 2E 63 6F 6D 2C  gcm@openssh.com,
+0x02E0: 35 40 6F 70 65 6E 73 73 68 2E 63 6F 6D 2C 61 65  5@openssh.com,ae
+0x0320: 65 74 6D 40 6F 70 65 6E 73 73 68 2E 63 6F 6D 2C  etm@openssh.com,
+
+- we are looking for ssh in log and want to find additional information to create the rule based on our observations 
+
+sudo snort -r snort.log.9198189816545 -X -n 30 
+
+- where we find this giant packet and the decoded hex is corresponding to the names of ssh we saw at the packet before 
+
+04/30-07:16:44.791214 10.10.140.29:22 -> 10.10.245.36:46656    <--------
+TCP TTL:64 TOS:0x0 ID:25128 IpLen:20 DgmLen:1108 DF
+***AP*** Seq: 0x424F3104  Ack: 0xB916F224  Win: 0x1E3  TcpLen: 32
+TCP Options (3) => NOP NOP TS: 4119687002 1884579572 
+0x0000: 02 67 7A 27 40 23 02 6D 84 B4 B4 1B 08 00 45 00  .gz'@#.m......E.
+0x0010: 04 54 62 28 40 00 40 06 3F 26 0A 0A 8C 1D 0A 0A  .Tb(@.@.?&......
+0x0020: F5 24 00 16 B6 40 42 4F 31 04 B9 16 F2 24 80 18  .$...@BO1....$..
+0x0030: 01 E3 99 9C 00 00 01 01 08 0A F5 8D 6F 5A 70 54  ............oZpT
+0x0040: 66 F4 00 00 04 1C 0A 14 8B 93 01 A8 A9 E9 14 E8  f...............
+0x0050: A6 13 E6 59 B6 E2 B2 CB 00 00 00 E6 63 75 72 76  ...Y........curv
+0x0060: 65 32 35 35 31 39 2D 73 68 61 32 35 36 2C 63 75  e25519-sha256,cu
+0x0070: 72 76 65 32 35 35 31 39 2D 73 68 61 32 35 36 40  rve25519-sha256@
+0x0080: 6C 69 62 73 73 68 2E 6F 72 67 2C 65 63 64 68 2D  libssh.org,ecdh-
+0x0090: 73 68 61 32 2D 6E 69 73 74 70 32 35 36 2C 65 63  sha2-nistp256,ec
+0x00A0: 64 68 2D 73 68 61 32 2D 6E 69 73 74 70 33 38 34  dh-sha2-nistp384
+0x00B0: 2C 65 63 64 68 2D 73 68 61 32 2D 6E 69 73 74 70  ,ecdh-sha2-nistp
+0x00C0: 35 32 31 2C 64 69 66 66 69 65 2D 68 65 6C 6C 6D  521,diffie-hellm
+0x00D0: 61 6E 2D 67 72 6F 75 70 2D 65 78 63 68 61 6E 67  an-group-exchang
+0x00E0: 65 2D 73 68 61 32 35 36 2C 64 69 66 66 69 65 2D  e-sha256,diffie-
+0x00F0: 68 65 6C 6C 6D 61 6E 2D 67 72 6F 75 70 31 36 2D  hellman-group16-
+0x0100: 73 68 61 35 31 32 2C 64 69 66 66 69 65 2D 68 65  sha512,diffie-he
+0x0110: 6C 6C 6D 61 6E 2D 67 72 6F 75 70 31 38 2D 73 68  llman-group18-sh
+0x0120: 61 35 31 32 2C 64 69 66 66 69 65 2D 68 65 6C 6C  a512,diffie-hell
+0x0130: 6D 61 6E 2D 67 72 6F 75 70 31 34 2D 73 68 61 32  man-group14-sha2
+0x0140: 35 36 00 00 00 41 72 73 61 2D 73 68 61 32 2D 35  56...Arsa-sha2-5
+0x0150: 31 32 2C 72 73 61 2D 73 68 61 32 2D 32 35 36 2C  12,rsa-sha2-256,
+0x0160: 73 73 68 2D 72 73 61 2C 65 63 64 73 61 2D 73 68  ssh-rsa,ecdsa-sh
+0x0170: 61 32 2D 6E 69 73 74 70 32 35 36 2C 73 73 68 2D  a2-nistp256,ssh-
+0x0180: 65 64 32 35 35 31 39 00 00 00 6C 63 68 61 63 68  ed25519...lchach
+0x0190: 61 32 30 2D 70 6F 6C 79 31 33 30 35 40 6F 70 65  a20-poly1305@ope
+0x01A0: 6E 73 73 68 2E 63 6F 6D 2C 61 65 73 31 32 38 2D  nssh.com,aes128-
+0x01B0: 63 74 72 2C 61 65 73 31 39 32 2D 63 74 72 2C 61  ctr,aes192-ctr,a
+0x01C0: 65 73 32 35 36 2D 63 74 72 2C 61 65 73 31 32 38  es256-ctr,aes128
+0x01D0: 2D 67 63 6D 40 6F 70 65 6E 73 73 68 2E 63 6F 6D  -gcm@openssh.com
+0x01E0: 2C 61 65 73 32 35 36 2D 67 63 6D 40 6F 70 65 6E  ,aes256-gcm@open
+0x01F0: 73 73 68 2E 63 6F 6D 00 00 00 6C 63 68 61 63 68  ssh.com...lchach
+0x0200: 61 32 30 2D 70 6F 6C 79 31 33 30 35 40 6F 70 65  a20-poly1305@ope
+0x0210: 6E 73 73 68 2E 63 6F 6D 2C 61 65 73 31 32 38 2D  nssh.com,aes128-
+0x0220: 63 74 72 2C 61 65 73 31 39 32 2D 63 74 72 2C 61  ctr,aes192-ctr,a
+0x0230: 65 73 32 35 36 2D 63 74 72 2C 61 65 73 31 32 38  es256-ctr,aes128
+0x0240: 2D 67 63 6D 40 6F 70 65 6E 73 73 68 2E 63 6F 6D  -gcm@openssh.com
+0x0250: 2C 61 65 73 32 35 36 2D 67 63 6D 40 6F 70 65 6E  ,aes256-gcm@open
+0x0260: 73 73 68 2E 63 6F 6D 00 00 00 D5 75 6D 61 63 2D  ssh.com....umac-
+0x0270: 36 34 2D 65 74 6D 40 6F 70 65 6E 73 73 68 2E 63  64-etm@openssh.c
+0x0280: 6F 6D 2C 75 6D 61 63 2D 31 32 38 2D 65 74 6D 40  om,umac-128-etm@
+0x0290: 6F 70 65 6E 73 73 68 2E 63 6F 6D 2C 68 6D 61 63  openssh.com,hmac
+0x02A0: 2D 73 68 61 32 2D 32 35 36 2D 65 74 6D 40 6F 70  -sha2-256-etm@op
+0x02B0: 65 6E 73 73 68 2E 63 6F 6D 2C 68 6D 61 63 2D 73  enssh.com,hmac-s
+0x02C0: 68 61 32 2D 35 31 32 2D 65 74 6D 40 6F 70 65 6E  ha2-512-etm@open
+0x02D0: 73 73 68 2E 63 6F 6D 2C 68 6D 61 63 2D 73 68 61  ssh.com,hmac-sha
+0x02E0: 31 2D 65 74 6D 40 6F 70 65 6E 73 73 68 2E 63 6F  1-etm@openssh.co
+0x02F0: 6D 2C 75 6D 61 63 2D 36 34 40 6F 70 65 6E 73 73  m,umac-64@openss
+0x0300: 68 2E 63 6F 6D 2C 75 6D 61 63 2D 31 32 38 40 6F  h.com,umac-128@o
+0x0310: 70 65 6E 73 73 68 2E 63 6F 6D 2C 68 6D 61 63 2D  penssh.com,hmac-
+0x0320: 73 68 61 32 2D 32 35 36 2C 68 6D 61 63 2D 73 68  sha2-256,hmac-sh
+0x0330: 61 32 2D 35 31 32 2C 68 6D 61 63 2D 73 68 61 31  a2-512,hmac-sha1
+0x0340: 00 00 00 D5 75 6D 61 63 2D 36 34 2D 65 74 6D 40  ....umac-64-etm@
+0x0350: 6F 70 65 6E 73 73 68 2E 63 6F 6D 2C 75 6D 61 63  openssh.com,umac
+0x0360: 2D 31 32 38 2D 65 74 6D 40 6F 70 65 6E 73 73 68  -128-etm@openssh
+0x0370: 2E 63 6F 6D 2C 68 6D 61 63 2D 73 68 61 32 2D 32  .com,hmac-sha2-2
+0x0380: 35 36 2D 65 74 6D 40 6F 70 65 6E 73 73 68 2E 63  56-etm@openssh.c
+0x0390: 6F 6D 2C 68 6D 61 63 2D 73 68 61 32 2D 35 31 32  om,hmac-sha2-512
+0x03A0: 2D 65 74 6D 40 6F 70 65 6E 73 73 68 2E 63 6F 6D  -etm@openssh.com
+0x03B0: 2C 68 6D 61 63 2D 73 68 61 31 2D 65 74 6D 40 6F  ,hmac-sha1-etm@o
+0x03C0: 70 65 6E 73 73 68 2E 63 6F 6D 2C 75 6D 61 63 2D  penssh.com,umac-
+0x03D0: 36 34 40 6F 70 65 6E 73 73 68 2E 63 6F 6D 2C 75  64@openssh.com,u
+0x03E0: 6D 61 63 2D 31 32 38 40 6F 70 65 6E 73 73 68 2E  mac-128@openssh.
+0x03F0: 63 6F 6D 2C 68 6D 61 63 2D 73 68 61 32 2D 32 35  com,hmac-sha2-25
+0x0400: 36 2C 68 6D 61 63 2D 73 68 61 32 2D 35 31 32 2C  6,hmac-sha2-512,
+0x0410: 68 6D 61 63 2D 73 68 61 31 00 00 00 15 6E 6F 6E  hmac-sha1....non
+0x0420: 65 2C 7A 6C 69 62 40 6F 70 65 6E 73 73 68 2E 63  e,zlib@openssh.c
+0x0430: 6F 6D 00 00 00 15 6E 6F 6E 65 2C 7A 6C 69 62 40  om....none,zlib@
+0x0440: 6F 70 65 6E 73 73 68 2E 63 6F 6D 00 00 00 00 00  openssh.com.....
+0x0450: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
+0x0460: 00 00                                            ..
+
+- conclusion is that we should temporarely disable all port 22 traffic in case the attacker changes his IP address which could run around our rule if we used IP 
+
+- to run snort in IPS mode we need to first add the rule into /etc/snort/rules/local.rules file 
+
+terminal: sudo gedit /etc/snort/rules/local.rules
+
+----------------------------------------------------------------------------| 
+# $Id: local.rules,v 1.11 2004/07/23 20:15:44 bmc Exp $			    |
+# ----------------							    |
+# LOCAL RULES								    |
+# ----------------							    |
+# This file intentionally does not come with signatures.  Put your local    |
+# additions here.							    |
+									    |
+drop tcp any 22 <> any any (msg:"SSH-block"; sid:1000001; rev:1;)	    |
+----------------------------------------------------------------------------|
+
+- to use snort as IPS DAQ needs to be activated and interface needs to be selected 
+
+- first create output to console to see if our rule has effect 
+
+sudo snort -c /etc/snort/snort.conf -q -Q --daq afpacket -i eth0:eth1 -A console
+04/30-08:17:54.062881  [Drop] [**] [1:1000001:1] SSH-block [**] [Priority: 0] {TCP} 10.10.245.36:46642 -> 10.10.140.29:22
+04/30-08:17:54.332101  [Drop] [**] [1:1000001:1] SSH-block [**] [Priority: 0] {TCP} 10.10.245.36:46616 -> 10.10.140.29:22
+04/30-08:17:54.363637  [Drop] [**] [1:1000001:1] SSH-block [**] [Priority: 0] {TCP} 10.10.245.36:46644 -> 10.10.140.29:22
+04/30-08:17:54.366325  [Drop] [**] [1:1000001:1] SSH-block [**] [Priority: 0] {TCP} 10.10.245.36:46618 -> 10.10.140.29:22
+04/30-08:17:54.387758  [Drop] [**] [1:1000001:1] SSH-block [**] [Priority: 0] {TCP} 10.10.245.36:46646 -> 10.10.140.29:22
+........
+
+- second let the snort IPS run in full 
+
+sudo snort -c /ect/snort/snort.conf -q -Q --daq afpacket -i eth0:eth1 -A full
+
+

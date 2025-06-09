@@ -1,0 +1,104 @@
+Snort exercises 3 
+
+----------
+Question 1 
+
+Write a rule to detect the PNG file in the given pcap. = alert tcp any any <> any any  (content:"PNG";sid:1000001;)
+
+Investigate the logs and identify the software name embedded in the packet. = Adobe Image
+
+alert tcp any any <> any any  (content:"PNG";sid:1000001;)
+- searching for PNG content in packets 
+
+Terminal: sudo snort -r ftp-png-gif.pcap -c local.rules -l .
+- creates file: snort.log.1745933288
+
+Terminal: sudo snort -r snort.log.1723777434 -X
+
+Commencing packet processing (pid=2613)
+WARNING: No preprocessors configured for policy 0.
+01/05-20:15:59.817928 176.255.203.40:80 -> 192.168.47.171:2732
+TCP TTL:128 TOS:0x0 ID:63105 IpLen:20 DgmLen:1174
+***AP*** Seq: 0x3D2348B0  Ack: 0x8C8DF67F  Win: 0xFAF0  TcpLen: 20
+0x0000: 00 0C 29 1D B3 B1 00 50 56 FD 2F 16 08 00 45 00  ..)....PV./...E.
+0x0010: 04 96 F6 81 00 00 80 06 D3 64 B0 FF CB 28 C0 A8  .........d...(..
+0x0020: 2F AB 00 50 0A AC 3D 23 48 B0 8C 8D F6 7F 50 18  /..P..=#H.....P.
+0x0030: FA F0 F9 DD 00 00 89 50 4E 47 0D 0A 1A 0A 00 00  .......PNG......
+0x0040: 00 0D 49 48 44 52 00 00 01 E0 00 00 01 E0 08 06  ..IHDR..........
+0x0050: 00 00 00 7D D4 BE 95 00 00 00 19 74 45 58 74 53  ...}.......tEXtS
+0x0060: 6F 66 74 77 61 72 65 00 41 64 6F 62 65 20 49 6D  oftware.Adobe Im    <- Image 
+0x0070: 61 67 65 52 65 61 64 79 71 C9 65 3C 00 00 16 2E  ageReadyq.e<....    <- Ready 
+0x0080: 49 44 41 54 78 DA EC DD 7F 88 65 57 61 07 F0 97  IDATx.....eWa...
+0x0090: 49 08 08 82 49 20 10 10 B2 AE 28 0D 91 34 BB 58  I...I ....(..4.X
+0x00A0: 5A 84 94 24 85 40 4A A4 71 4B C5 D2 62 4D F0 0F  Z..$.@J.qK..bM..
+0x00B0: A9 34 98 08 85 8A 85 D9 15 84 D2 52 B2 4B 0B 52  .4.........R.K.R
+...........
+
+File name = ImageReady 
+
+----------
+Question 2
+
+Write a rule to detect the GIF file in the given pcap. = alert tcp any any <> any any (content:"GIF";sid:1000002;)
+
+Investigate the logs and identify the image format embedded in the packet. = GIF89a
+
+WARNING: No preprocessors configured for policy 0.
+01/05-20:15:46.771530 77.72.118.168:80 -> 192.168.47.171:2741
+TCP TTL:128 TOS:0x0 ID:63093 IpLen:20 DgmLen:83
+***AP**F Seq: 0x2FC56F3  Ack: 0xA6C502A7  Win: 0xFAF0  TcpLen: 20
+0x0000: 00 0C 29 1D B3 B1 00 50 56 FD 2F 16 08 00 45 00  ..)....PV./...E.
+0x0010: 00 53 F6 75 00 00 80 06 8F EB 4D 48 76 A8 C0 A8  .S.u......MHv...
+0x0020: 2F AB 00 50 0A B5 02 FC 56 F3 A6 C5 02 A7 50 19  /..P....V.....P.
+0x0030: FA F0 6D 90 00 00 47 49 46 38 39 61 01 00 01 00  ..m...GIF89a....
+0x0040: 80 00 00 FF FF FF 00 00 00 21 F9 04 01 00 00 00  .........!......
+0x0050: 00 2C 00 00 00 00 01 00 01 00 00 02 02 44 01 00  .,...........D..
+0x0060: 3B                                               ;
+ 
+----------
+Question 3 
+
+Write a rule to detect the torrent metafile in the given pcap. = alert tcp any any <> any any (msg:"torrent-metafile"; content:".torrent";sid:1000001;r>
+
+What is the number of detected packets? = 2 
+
+Terminal: sudo snort -r torrent.pcap -c local.rules -l . 
+
+Terminal: sudo snort -r snort.log.1745934663 -X 
+
+----------
+Question 4 
+
+Investigate the log/alarm files.
+What is the name of the torrent application? = bittorrent
+
+What is the MIME (Multipurpose Internet Mail Extensions) type of the torrent metafile? = application/x-bittorrent
+
+What is the hostname of the torrent metafile? = tracker2.torrentbox.com
+
+......................
+0x00A0: 32 34 65 25 32 37 56 25 45 45 4D 25 31 36 25 35  24e%27V%EEM%16%5
+0x00B0: 42 26 70 6F 72 74 3D 34 31 37 33 30 26 75 70 6C  B&port=41730&upl
+0x00C0: 6F 61 64 65 64 3D 30 26 64 6F 77 6E 6C 6F 61 64  oaded=0&download
+0x00D0: 65 64 3D 30 26 6C 65 66 74 3D 33 37 36 37 38 36  ed=0&left=376786
+0x00E0: 39 26 63 6F 6D 70 61 63 74 3D 31 26 69 70 3D 31  9&compact=1&ip=1
+0x00F0: 32 37 2E 30 2E 30 2E 31 20 48 54 54 50 2F 31 2E  27.0.0.1 HTTP/1.
+0x0100: 31 0D 0A 41 63 63 65 70 74 3A 20 61 70 70 6C 69  1..Accept: appli
+0x0110: 63 61 74 69 6F 6E 2F 78 2D 62 69 74 74 6F 72 72  cation/x-bittorr
+0x0120: 65 6E 74 0D 0A 41 63 63 65 70 74 2D 45 6E 63 6F  ent..Accept-Enco
+0x0130: 64 69 6E 67 3A 20 67 7A 69 70 0D 0A 55 73 65 72  ding: gzip..User
+0x0140: 2D 41 67 65 6E 74 3A 20 52 41 5A 41 20 32 2E 31  -Agent: RAZA 2.1
+0x0150: 2E 30 2E 30 0D 0A 48 6F 73 74 3A 20 74 72 61 63  .0.0..Host: trac
+0x0160: 6B 65 72 32 2E 74 6F 72 72 65 6E 74 62 6F 78 2E  ker2.torrentbox.  <---
+0x0170: 63 6F 6D 3A 32 37 31 30 0D 0A 43 6F 6E 6E 65 63  com:2710..Connec
+0x0180: 74 69 6F 6E 3A 20 4B 65 65 70 2D 41 6C 69 76 65  tion: Keep-Alive
+0x0190: 0D 0A 0D 0A                                      ....
+
+sudo strings snort.log.1745934663 
+GET /announce?info_hash=%01d%FE%7E%F1%10%5CWvAp%ED%F6%03%C49%D6B%14%F1&peer_id=%B8js%7F%E8%0C%AFh%02Y%967%24e%27V%EEM%16%5B&port=41730&uploaded=0&downloaded=0&left=3767869&compact=1&ip=127.0.0.1&event=started HTTP/1.1
+Accept: application/x-bittorrent              <--------------------
+Accept-Encoding: gzip
+User-Agent: RAZA 2.1.0.0
+Host: tracker2.torrentbox.com:2710
+Connection: Keep-Alive
+
