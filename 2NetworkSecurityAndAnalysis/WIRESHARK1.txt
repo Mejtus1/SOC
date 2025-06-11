@@ -1,0 +1,322 @@
+Wireshark filters 
+
+🔹 Basic IP and Network Filters
+host 192.168.1.1
+Captures all traffic to or from the specified IP address.
+CellStream, Inc.
++1
+wiki.wireshark.org
++1
+
+net 192.168.1.0/24
+Captures all traffic to or from the specified subnet.
+CellStream, Inc.
++1
+wiki.wireshark.org
++1
+
+src host 10.0.0.5
+Captures traffic originating from the specified IP address.
+networkproguide.com
++3
+CellStream, Inc.
++3
+wiki.wireshark.org
++3
+
+dst net 172.16.0.0/16
+Captures traffic destined for the specified subnet.
+hackingloops.com
++1
+wiki.wireshark.org
++1
+
+🔹 Port and Protocol Filters
+port 80
+Captures traffic on port 80 (commonly HTTP).
+stationx.net
++10
+CellStream, Inc.
++10
+wiki.wireshark.org
++10
+wiki.wireshark.org
++1
+CellStream, Inc.
++1
+
+tcp port 443
+Captures TCP traffic on port 443 (commonly HTTPS).
+CellStream, Inc.
++2
+assets.ctfassets.net
++2
+assets.ctfassets.net
++2
+
+udp port 53
+Captures UDP traffic on port 53 (commonly DNS).
+
+tcp portrange 1000-2000
+Captures TCP traffic within the specified port range.
+wiki.wireshark.org
+
+🔹 MAC Address and Ethernet Filters
+ether host 00:11:22:33:44:55
+Captures traffic to or from the specified MAC address.
+CellStream, Inc.
++1
+wiki.wireshark.org
++1
+
+ether broadcast
+Captures all broadcast traffic.
+
+ether multicast
+Captures all multicast traffic.
+networkproguide.com
++2
+wiki.wireshark.org
++2
+Comparitech
++2
+
+🔹 Protocol-Specific Filters
+ip
+Captures all IPv4 traffic.
+
+ip6
+Captures all IPv6 traffic.
+CellStream, Inc.
++1
+howtogeek.com
++1
+
+arp
+Captures all ARP traffic.
+
+icmp
+Captures all ICMP traffic (e.g., ping).
+
+🔹 Combined Filters Using Logical Operators
+host 192.168.1.1 and port 22
+Captures SSH traffic to or from the specified IP address.
+wiki.wireshark.org
++2
+CellStream, Inc.
++2
+Comparitech
++2
+
+net 10.0.0.0/8 and not port 80
+Captures all traffic within the specified network, excluding port 80.
+wiki.wireshark.org
+
+tcp and (port 443 or port 8443)
+Captures TCP traffic on ports 443 and 8443.
+
+Comparison operators 
+
+eq	==	Equal	
+ip.src == 10.10.10.100
+
+ne	!=	Not equal	
+ip.src != 10.10.10.100
+
+gt	>	Greater than	
+ip.ttl > 250
+
+lt	<	Less Than	
+ip.ttl < 10
+
+ge	>=	Greater than or equal to	
+ip.ttl >= 0xFA
+
+le	<=	Less than or equal to	
+ip.ttl <= 0xA
+
+
+Logical Expressions 
+eq	==	Equal	
+ip.src == 10.10.10.100
+
+ne	!=	Not equal	
+ip.src != 10.10.10.100
+
+gt	>	Greater than	
+ip.ttl > 250
+
+lt	<	Less Than	
+ip.ttl < 10
+
+ge	>=	Greater than or equal to	
+ip.ttl >= 0xFA
+
+le	<=	Less than or equal to	
+ip.ttl <= 0xA
+
+IP filters 
+
+eq	==	Equal	
+ip.src == 10.10.10.100
+
+ne	!=	Not equal	
+ip.src != 10.10.10.100
+
+gt	>	Greater than	
+ip.ttl > 250
+
+lt	<	Less Than	
+ip.ttl < 10
+
+ge	>=	Greater than or equal to	
+ip.ttl >= 0xFA
+
+le	<=	Less than or equal to	
+ip.ttl <= 0xA
+
+
+TCP / UDP filters 
+
+tcp.port == 80
+
+Show all TCP packets with port 80 	
+udp.port == 53
+
+Show all UDP packets with port 53
+tcp.srcport == 1234
+
+Show all TCP packets originating from port 1234	
+udp.srcport == 1234
+
+Show all UDP packets originating from port 1234
+tcp.dstport == 80
+
+Show all TCP packets sent to port 80	
+udp.dstport == 5353
+
+Show all UDP packets sent to port 5353
+
+
+Application level filters | HTTP and DNS 
+
+tcp.port == 80
+
+Show all TCP packets with port 80 	
+udp.port == 53
+
+Show all UDP packets with port 53
+tcp.srcport == 1234
+
+Show all TCP packets originating from port 1234	
+udp.srcport == 1234
+
+Show all UDP packets originating from port 1234
+tcp.dstport == 80
+
+Show all TCP packets sent to port 80	
+udp.dstport == 5353
+
+Show all UDP packets sent to port 5353
+
+
+Filter: "contains"
+
+Filter
+contains
+Type	Comparison Operator
+Description	Search a value inside packets. It is case-sensitive and provides similar functionality to the "Find" option by focusing on a specific field.
+Example	Find all "Apache" servers.
+Workflow	List all HTTP packets where packets' "server" field contains the "Apache" keyword.
+Usage	
+http.server contains "Apache"
+
+
+
+Exercises: 
+
+Exercise 1 
+
+What is number of IP packets ? 
+ip 
+
+what is number of packets with ttl less than 10 ? 
+ip.ttl < 10 
+
+what is number of packets with tcp port 4444 ? 
+tcp.port == 4444
+
+What is the number of HTTP GET requests on port 80 ? 
+http.request.method == "GET" and tcp.port == 80
+
+What is number of Typa A DNS queries ? 
+dns.a 
+
+
+
+Filter: "in"
+
+Filter
+in
+Type	 Set Membership
+Description	Search a value or field inside of a specific scope/range.
+Example	Find all packets that use ports 80, 443 or 8080.
+Workflow	List all TCP packets where packets' "port" fields have values 80, 443 or 8080.
+Usage	
+tcp.port in {80 443 8080}
+
+
+Filter: "upper"
+
+Filter
+upper
+Type	Function
+Description	Convert a string value to uppercase.
+Example	Find all "APACHE" servers.
+Workflow	Convert all HTTP packets' "server" fields to uppercase and list packets that contain the "APACHE" keyword.
+Usage	
+upper(http.server) contains "APACHE"
+
+Filter: "lower"
+
+Filter
+lower
+Type	Function
+Description	Convert a string value to lowercase.
+Example	Find all "apache" servers.
+Workflow	Convert all HTTP packets' "server" fields info to lowercase and list packets that contain the "apache" keyword.
+Usage	
+lower(http.server) contains "apache"
+
+
+Filter: "string"
+
+Filter
+string
+Type	Function
+Description	Convert a non-string value to a string.
+Example	Find all frames with odd numbers.
+Workflow	Convert all "frame number" fields to string values, and list frames end with odd values.
+Usage	
+string(frame.number) matches "[13579]$"
+
+
+exercise 2 
+
+Find all Microsoft IIS servers. What is the number of packets that did not originate from "port 80"? 
+http contains "Microsoft-IIS" and not tcp.srcport == 80
+
+Find all Microsoft IIS servers. What is the number of packets that have "version 7.5"?
+http contains "Microsoft-IIS/7.5"
+
+What is the total number of packets that use ports 3333, 4444 or 9999?
+tcp.port in {3333 4444 9999} 
+
+What is the number of packets with "even TTL numbers"?
+string(ip.ttl) matches "[02468]$"
+
+Change the profile to "Checksum Control". What is the number of "Bad TCP Checksum" packets?
+tcp.checksum.status == 0 
+
+Use the existing filtering button to filter the traffic. What is the number of displayed packets?
+
