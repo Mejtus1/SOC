@@ -1,0 +1,88 @@
+Windows processes 
+
+----------------------
+CORE WINDOWS PROCESSES
+Understanding Windows core processes helps detect anomalies during endpoint log analysis.
+
+Normal Core Processes:
+System
+System > smss.exe
+csrss.exe
+wininit.exe
+services.exe
+svchost.exe
+lsass.exe
+winlogon.exe
+explorer.exe
+Note: Processes without a parent should not exist (except System, whose parent is PID 0).
+
+------------
+TASK MANAGER
+Built-in Windows GUI tool
+Monitors running processes
+Shows CPU, memory usage
+Can terminate unresponsive programs
+
+------------------
+SYSINTERNALS SUITE
+A Microsoft toolkit of 70+ utilities for analyzing Windows systems.
+
+Categories include:
+File and Disk Utilities
+Networking Utilities
+Process Utilities
+Security Utilities
+System Info
+Miscellaneous
+
+-------
+TCPVIEW
+Visualizes TCP and UDP connections
+
+Shows local/remote addresses and port states
+Identifies owning process
+More user-friendly than netstat
+CLI version available: tcpvcon
+
+----------------
+PROCESS EXPLORER
+Advanced process viewer
+
+Top pane: running processes and user accounts
+Bottom pane (2 modes):
+Handle mode: open files and directories
+DLL mode: loaded DLLs and memory-mapped files
+
+Key uses:
+View active services
+Inspect network connections
+Analyze file handles
+Identify DLL dependencies
+
+----------------
+WINDOWS LOGGING 
+
+------------------
+Windows Event Logs
+Stored as .evtx in C:\Windows\System32\winevt\Logs
+Access via: Event Viewer, wevtutil, or Get-WinEvent
+
+------
+Sysmon
+Part of Sysinternals
+Logs detailed system activity (27 event types)
+Works with SIEMs for threat detection
+Needs a config file (e.g., SwiftOnSecurity’s)
+
+-------
+OSQuery
+SQL-style system querying
+Supports Windows, Linux, macOS
+Example: select * from processes where name='lsass.exe';
+Kolide Fleet lets you query multiple machines via web UI
+
+-----
+Wazuh
+Open-source EDR
+Manager-agent setup
+Detects threats, logs anomalies, shows visual data
