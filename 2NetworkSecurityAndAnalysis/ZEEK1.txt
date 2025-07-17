@@ -1,0 +1,211 @@
+ZEEK 
+
+LOGGING LOGICALLY 
+not LOGGING EVERYTHING 
+
+- zeek is harder to use than snort, it is used for in depth traffic visibility 
+- common uses are network monitoring and in depth traffic investigations ( also intrusion detection in chained events )
+
+ZEEK ARCHITECTURE 
+
+- zeek has two primary layers: 
+Event Engine = packets are processed 
+Policy Script Interpreter = semantic analysis contucted = event correlations using zeek scripts 
+
+- default log path for zeek is /opt/zeek/logs/
+
+primary startup of ZEEK 
+
+root@ubuntu$ zeekctl
+Welcome to ZeekControl 2.X.0
+[ZeekControl] > status
+Name         Type       Host          Status    Pid    Started
+zeek         standalone localhost     stopped
+[ZeekControl] > start
+starting zeek ...
+[ZeekControl] > status
+Name         Type       Host          Status    Pid    Started
+zeek         standalone localhost     running   2541   13 Mar 18:25:08
+[ZeekControl] > stop
+stopping zeek ...
+[ZeekControl] > status
+Name         Type       Host          Status    Pid    Started
+zeek         standalone localhost     stopped
+
+- there is also possibility to combine them: 
+zeekctl status
+zeekctl start
+zeekctl stop 
+
+--------------------------------------------------------------------------------
+ZEEK LOGS 
+
+Network
+Network protocol logs.
+conn.log, dce_rpc.log, dhcp.log, dnp3.log, dns.log, ftp.log, http.log, irc.log, kerberos.log, modbus.log, modbus_register_change.log, mysql.log, ntlm.log, ntp.log, radius.log, rdp.log, rfb.log, sip.log, smb_cmd.log, smb_files.log, smb_mapping.log, smtp.log, snmp.log, socks.log, ssh.log, ssl.log, syslog.log, tunnel.log.
+
+Files
+File analysis result logs.
+files.log, ocsp.log, pe.log, x509.log.
+
+NetControl
+Network control and flow logs.
+netcontrol.log, netcontrol_drop.log, netcontrol_shunt.log, netcontrol_catch_release.log, openflow.log.
+
+Detection
+Detection and possible indicator logs.
+intel.log, notice.log, notice_alarm.log, signatures.log, traceroute.log.
+
+Network Observations
+Network flow logs.
+known_certs.log, known_hosts.log, known_modbus.log, known_services.log, software.log.
+
+Miscellaneous
+Additional logs cover external alerts, inputs and failures.
+barnyard2.log, dpd.log, unified2.log, unknown_protocols.log, weird.log, weird_stats.log.
+
+Zeek Diagnostic
+Zeek diagnostic logs cover system messages, actions and some statistics.
+broker.log, capture_loss.log, cluster.log, config.log, loaded_scripts.log, packet_filter.log, print.log, prof.log, reporter.log, stats.log, stderr.log, stdout.log.
+
+---------------------------------------------------------------------------
+
+- checking version of zeek 
+
+ubuntu@ip-10-10-135-147:~/Desktop$ zeek -v 
+zeek version 4.2.1
+
+- zeek ctl command line 
+
+root@ubuntu$ zeekctl
+Welcome to ZeekControl 2.X.0
+[ZeekControl] > status
+Name         Type       Host          Status    Pid    Started
+zeek         standalone localhost     stopped
+[ZeekControl] > start
+starting zeek ...
+[ZeekControl] > status
+Name         Type       Host          Status    Pid    Started
+zeek         standalone localhost     running   2541   13 Mar 18:25:08
+[ZeekControl] > stop
+stopping zeek ...
+[ZeekControl] > status
+Name         Type       Host          Status    Pid    Started
+zeek         standalone localhost     stopped
+
+- opening pcap file with zeek (extracts all log files into directory we are currently in) 
+
+zeek -C -r sample.pcap 
+ubuntu@ip-10-10-135-147:~/Desktop/Exercise-Files/TASK-2$ ls 
+clear-logs.sh  dhcp.log  ntp.log            sample.pcap  ssh.log
+conn.log       dns.log   packet_filter.log  snmp.log     syslog.log
+
+- zeekctl to find out version of zeek control module
+
+zeekctl
+Warning: new zeek version detected (run the zeekctl "deploy" command)
+
+Welcome to ZeekControl 2.4.0
+
+Type "help" for help.
+
+[ZeekControl] > 
+
+Investigate the sample.pcap file. Investigate the dhcp.log file. What is the available hostname?
+
+cat dhcp.log | zeek-cut host_name
+Microknoppix
+Microknoppix
+
+- hostname 
+
+Investigate the dns.log file. What is the number of unique DNS queries?
+
+cat dns.log | zeek-cut query
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+blog.webernetz.net
+ip.webernetz.net
+
+- number of queries 2 
+
+Investigate the conn.log file. What is the longest connection duration?
+
+cat conn.log | zeek-cut duration | sort -n -r 
+332.319364
+331.791038
+329.899861
+325.924370
+319.846921
+309.515828
+
+- 332.319364
+
+------------------------------------------------------------------------------------------
+ZEEK SIGNATURES 
+
+----------------------------------
+HTTP password submission signature
+
+signature http-password {
+     ip-proto == tcp
+     dst-port == 80
+     payload /.*password.*/
+     event "Cleartext Password Found!"
+}
+
+# signature: Signature name.
+# ip-proto: Filtering TCP connection.
+# dst-port: Filtering destination port 80.
+# payload: Filtering the "password" phrase.
+# event: Signature match message.
+
+ubuntu@ubuntu$ zeek -C -r http.pcap -s http-password.sig 
+ubuntu@ubuntu$ ls
+clear-logs.sh  conn.log  files.log  http-password.sig  http.log  http.pcap  notice.log  packet_filter.log  signatures.log
+
+ubuntu@ubuntu$ cat notice.log  | zeek-cut id.orig_h id.resp_h msg 
+10.10.57.178	44.228.249.3	10.10.57.178: Cleartext Password Found!
+10.10.57.178	44.228.249.3	10.10.57.178: Cleartext Password Found!
+
+ubuntu@ubuntu$ cat signatures.log | zeek-cut src_addr dest_addr sig_id event_msg 
+10.10.57.178		http-password	10.10.57.178: Cleartext Password Found!
+10.10.57.178		http-password	10.10.57.178: Cleartext Password Found!
+
+- looking at application log 
+
+ubuntu@ubuntu$ cat signatures.log | zeek-cut sub_msg
+POST /userinfo.php HTTP/1.1\x0d\x0aHost: testphp.vulnweb.com\x0d\x0aUser-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/...
+
+ubuntu@ubuntu$ cat notice.log  | zeek-cut sub
+POST /userinfo.php HTTP/1.1\x0d\x0aHost: testphp.vulnweb.com\x0d\x0aUser-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:98.0) Gecko/20100101 Firefox/...
+
+
+---------------
+FTP brute-force 
+
+- identify admin log attempts 
+
+signature ftp-admin {
+     ip-proto == tcp
+     ftp /.*USER.*dmin.*/
+     event "FTP Admin Login Attempt!"
+}
+
+
+ubuntu@ubuntu$ zeek -C -r ftp.pcap -s ftp-admin.sig
+ubuntu@ubuntu$ cat signatures.log | zeek-cut src_addr dst_addr event_msg sub_msg | sort -r| uniq
+10.234.125.254	10.121.70.151	10.234.125.254: FTP Admin Login Attempt!	USER administrator
+10.234.125.254	10.121.70.151	10.234.125.254: FTP Admin Login Attempt!	USER admin 
