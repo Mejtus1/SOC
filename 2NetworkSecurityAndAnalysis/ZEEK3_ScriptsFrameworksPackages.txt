@@ -1,0 +1,88 @@
+ZEEK3
+
+- script basics 
+
+----------------------------------
+event  "zeek_init" and "zeek_done"
+
+event zeek_init()
+    {
+     print ("Started Zeek!");
+    }
+event zeek_done()
+    {
+    print ("Stopped Zeek!");
+    }
+
+# zeek_init: Do actions once Zeek starts its process.
+# zeek_done: Do activities once Zeek finishes its process.
+# print: Prompt a message on the terminal.
+
+Terminal output: 
+ubuntu@ubuntu$ zeek -C -r sample.pcap 101.zeek 
+Started Zeek!
+Stopped Zeek!
+
+-----------------------
+Investigating bulk data 
+
+- requesting details of connection and extracting them without any filtering or sorting of data using "new_connection" event
+
+event new_connection(c: connection)
+{
+	print c;
+}
+
+Terminal output: 
+ubuntu@ubuntu$ zeek -C -r sample.pcap 102.zeek 
+[id=[orig_h=192.168.121.40, orig_p=123/udp, resp_h=212.227.54.68, resp_p=123/udp], orig=[size=48, state=1, num_pkts=0, num_bytes_ip=0, flow_label=0, l2_addr=00:16:47:df:e7:c1], resp=[size=0, state=0, num_pkts=0, num_bytes_ip=0, flow_label=0, l2_addr=00:00:0c:9f:f0:79], start_time=1488571365.706238, duration=0 secs, service={}, history=D, uid=CajwDY2vSUtLkztAc, tunnel=, vlan=121, inner_vlan=, dpd=, dpd_state=, removal_hooks=, conn=, extract_orig=F, extract_resp=F, thresholds=, dce_rpc=, dce_rpc_state=, dce_rpc_backing=, dhcp=, dnp3=, dns=, dns_state=, ftp=, ftp_data_reuse=F, ssl=, http=, http_state=, irc=, krb=, modbus=, mysql=, ntlm=, ntp=, radius=, rdp=, rfb=, sip=, sip_state=, snmp=, smb_state=, smtp=, smtp_state=, socks=, ssh=, syslog=]
+
+- in real life, we will need to filter information for specific purposes
+
+----------------------------
+Filter the event of interest
+
+event new_connection(c: connection)
+{
+	print ("###########################################################");
+	print ("");
+	print ("New Connection Found!");
+	print ("");
+	print fmt ("Source Host: %s # %s --->", c$id$orig_h, c$id$orig_p);
+	print fmt ("Destination Host: resp: %s # %s <---", c$id$resp_h, c$id$resp_p);
+	print ("");
+}
+
+# %s: Identifies string output for the source.
+# c$id: Source reference field for the identifier.
+
+Terminal output: 
+ubuntu@ubuntu$ zeek -C -r sample.pcap 103.zeek 
+###########################################################
+New Connection Found! Source Host: 192.168.121.2 # 58304/udp ---> 
+Destination Host: resp: 192.168.120.22 # 53/udp <--- 
+###########################################################
+
+-------------------------------
+Scripts and Signatures Together
+
+event signature_match (state: signature_state, msg: string, data: string)
+{
+if (state$sig_id == "ftp-admin")
+    {
+    print ("Signature hit! --> #FTP-Admin ");
+    }
+}
+
+ubuntu@ubuntu$ zeek -C -r ftp.pcap -s ftp-admin.sig 201.zeek 
+Signature hit! --> #FTP-Admin Signature hit! --> #FTP-Admin
+Signature hit! --> #FTP-Admin Signature hit! --> #FTP-Admin
+
+------------------
+Load Local Scripts
+
+ubuntu@ubuntu$ zeek -C -r ftp.pcap local 
+ubuntu@ubuntu$ ls
+101.zeek  103.zeek          clear-logs.sh  ftp.pcap            packet_filter.log  stats.log
+102.zeek  capture_loss.log  conn.log       loaded_scripts.log  sample.pcap        weird.log 
+
