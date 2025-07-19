@@ -1,0 +1,109 @@
+zeek exercises 
+
+---------------------------------------------------------
+1. Investigate the sample.pcap file with 103.zeek script. 
+Investigate the terminal output. What is the number of the detected new connections?
+87
+
+Terminal: 
+
+ubuntu@ip-10-10-125-95:~/Desktop/Exercise-Files/TASK-7/201$ zeek -C -r sample.pcap 103.zeek 
+ubuntu@ip-10-10-125-95:~/Desktop/Exercise-Files/TASK-7/201$ cat conn.log | sort | uniq | wc -l
+87 
+
+---------------------------
+2. Go to folder TASK-7/201.
+Investigate the ftp.pcap file with ftp-admin.sig signature and  201.zeek script. 
+Investigate the signatures.log file. 
+What is the number of signature hits?
+
+Terminal : 
+
+ubuntu@ip-10-10-125-95:~/Desktop/Exercise-Files/TASK-7/201$ zeek -C -r ftp.pcap -s ftp-admin.sig 201.zeek 
+ubuntu@ip-10-10-125-95:~/Desktop/Exercise-Files/TASK-7/201$ cat signatures.log | zeek-cut | sort | uniq | wc -l
+1401
+
+---------------------------------------
+3. Investigate the signatures.log file. 
+What is the total number of "administrator" username detections?
+
+cat signatures.log | grep "administrator" | sort | wc -l
+731 
+
+----------------------------------------
+4. Investigate the ftp-brute.pcap file with 
+"/opt/zeek/share/zeek/policy/protocols/ftp/detect-bruteforcing.zeek" script. 
+Investigate the notice.log file. What is the total number of brute-force detections?
+
+zeek -C -r ftp-brute.pcap /opt/zeek/share/zeek/policy/protocols/ftp/detect-bruteforcing.zeek
+
+cat notice.log | zeek-cut | sort | wc -l
+2
+
+cat notice.log | zeek-cut
+1024380732.223481	-	-	-	-	-	-	-	-	-FTP::Bruteforcing	10.234.125.254 had 20 failed logins on 1 FTP server in 0m1s	-10.234.125.254	-	-	-	-	Notice::ACTION_LOG	(empty)	3600.000000	-	-	-	-	-
+1389721084.522861	-	-	-	-	-	-	-	-	-FTP::Bruteforcing	192.168.56.1 had 20 failed logins on 1 FTP server in 0m37s	-192.168.56.1	-	-	-	-	Notice::ACTION_LOG	(empty)	3600.000000	-	-	-	-	-
+
+----------------------------------------------------------------------
+5. Investigate the case1.pcap file with intelligence-demo.zeek script. 
+Investigate the intel.log file. Look at the second finding, where was the intel info found? 
+
+ubuntu@ip-10-10-8-105:~/Desktop/Exercise-Files/TASK-8$ zeek -C -r case1.pcap intelligence-demo.zeek 
+ubuntu@ip-10-10-8-105:~/Desktop/Exercise-Files/TASK-8$ ls
+case1.pcap     dns.log                 http.log                pe.log
+clear-logs.sh  file-extract-demo.zeek  intel.log
+conn.log       files.log               intelligence-demo.zeek
+dhcp.log       hash-demo.zeek          packet_filter.log
+ubuntu@ip-10-10-8-105:~/Desktop/Exercise-Files/TASK-8$ cat intel.log 
+#separator \x09
+#set_separator	,
+#empty_field	(empty)
+#unset_field	-
+#path	intel
+#open	2025-05-16-20-56-58
+#fields	ts	uid	id.orig_h	id.orig_p	id.resp_h	id.resp_p	seen.indicator	seen.indicator_type	seen.where	seen.node	matched	sources	fuid	file_mime_type	file_desc
+#types	time	string	addr	port	addr	port	string	enum	enum	string	set[enum]	set[string]	string	string	string
+1561667898.779213	CpcnJV2UbCsrT5ELZ2	10.6.27.102	53770	10.6.27.1	53	smart-fax.com	Intel::DOMAIN	DNS::IN_REQUEST	zeek	Intel::DOMAIN	TASK-8-Demo
+1561667898.911759	Ci80Gn1GpZkWYDFCMl	10.6.27.102	49162	107.180.50.162	80	smart-fax.com	Intel::DOMAIN	HTTP::IN_HOST_HEADER	zeek	Intel::DOMAIN	TASK-8-Demo	-	-	-
+#close	2025-05-16-20-56-58
+
+ubuntu@ip-10-10-8-105:~/Desktop/Exercise-Files/TASK-8$ cat intel.log | zeek-cut
+1561667898.779213	CpcnJV2UbCsrT5ELZ2	10.6.27.102	53770	10.6.27.1	53	smart-fax.com	Intel::DOMAIN	DNS::IN_REQUEST	zeek	Intel::DOMAIN	TASK-8-Demo	-	-	-
+1561667898.911759	Ci80Gn1GpZkWYDFCMl	10.6.27.102	49162	107.180.50.162	80	smart-fax.com	Intel::DOMAIN	HTTP::IN_HOST_HEADER	zeek	Intel::DOMAIN	TASK-8-Demo	-	-	-
+
+---------------------------------
+6. Investigate the http.log file. 
+What is the name of the downloaded .exe file?
+
+ubuntu@ip-10-10-8-105:~/Desktop/Exercise-Files/TASK-8$ cat http.log | zeek-cut
+1561667874.713411	CE8l71ezZbHj2bYqh	10.6.27.102	49157	23.63.254.163	80	1	GET	www.msftncsi.com	/ncsi.txt	-	1.1	Microsoft NCSI	-	0	14	200	OK	-	-	(empty)	-	-	-	-	-	-	Fpgan59p6uvNzLFja	-text/plain
+1561667889.643717	CA0h4M1u51e3G0pg5k	10.6.27.102	49159	107.180.50.162	80	1	GET	smart-fax.com	/Documents/Invoice&MSO-Request.doc	-	1.1	Mozilla/5.0 (Windows NT 6.1; WOW64; Trident/7.0; rv:11.0) like Gecko	-	0	323072	200	OK	-	-	(empty)--	-	-	-	-	FB5o2Hcauv7vpQ8y3	-	application/msword
+1561667898.911759	Ci80Gn1GpZkWYDFCMl	10.6.27.102	49162	107.180.50.162	80	1	GET	smart-fax.com	/knr.exe	-	1.1	Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.1; WOW64; Trident/7.0; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; .NET4.0C; .NET4.0E)	-	0	2437120	200	OK	-	-	(empty)	-	-	-	-	-	-	FOghls3WpIjKpvXaEl	-application/x-dosexec
+
+knr.exe 
+
+-------------------------------------------------------------
+7. Investigate the case1.pcap file with hash-demo.zeek script. 
+Investigate the files.log file. What is the MD5 hash of the downloaded .exe file?
+
+ubuntu@ip-10-10-8-105:~/Desktop/Exercise-Files/TASK-8$ cat files.log 
+
+1561667899.060086	FOghls3WpIjKpvXaEl	107.180.50.162	10.6.27.102	CXLu3y3EuYu550m8O1	HTTP	0	SHA1,MD5,PE	application/x-dosexec	-	0.498764	-	F2437120	-	0	0	F	-	cc28e40b46237ab6d5282199ef78c464	0d5c820002cf93384016bd4a2628dcc5101211f4	-	-	-	-
+#close	2025-05-16-21-16-40
+
+cc28e40b46237ab6d5282199ef78c464
+
+-------------------------------------------------------------------
+8. Investigate the case1.pcap file with file-extract-demo.zeek script. 
+Investigate the "extract_files" folder. Review the contents of the text file. What is written in the file?
+
+ubuntu@ip-10-10-8-105:~/Desktop/Exercise-Files/TASK-8/extract_files$ ls 
+extract-1561667874.743959-HTTP-Fpgan59p6uvNzLFja
+extract-1561667889.703239-HTTP-FB5o2Hcauv7vpQ8y3
+extract-1561667899.060086-HTTP-FOghls3WpIjKpvXaEl
+
+ubuntu@ip-10-10-8-105:~/Desktop/Exercise-Files/TASK-8/extract_files$ cat extract-1561667874.743959-HTTP-Fpgan59p6uvNzLFja 
+Microsoft NCSI
+
+--------------------------------------------------------------
+9. 
