@@ -1,0 +1,80 @@
+Zeek cheatsheet
+
+Zeek is built around predefined event types and data structures — like connection, ssl, http, dns, etc. These come from Zeek's standard library, which is automatically loaded unless you disable it.
+
+============================
+ZEEK CHEAT SHEET (BEGINNER)
+============================
+
+Most Useful Zeek Events:
+------------------------
+Connection:
+- new_connection(c: connection)
+- connection_established(c: connection)
+- connection_state_remove(c: connection)
+
+HTTP:
+- http_request(c: connection, method: string, uri: string, version: string)
+- http_reply(c: connection, version: string, code: count, reason: string)
+
+SSL/TLS:
+- ssl_server_hello(c: connection)
+- ssl_established(c: connection)
+
+DNS:
+- dns_request(c: connection, msg: dns_msg)
+- dns_response(c: connection, msg: dns_msg)
+
+Files:
+- file_new(f: fa_file)
+- file_sniff(f: fa_file, data: string)
+- file_transferred(f: fa_file)
+
+SMTP:
+- smtp_request(c: connection, command: string, arg: string)
+- smtp_reply(c: connection, code: count, msg: string)
+
+System / Zeek Lifecycle:
+- zeek_init()
+- zeek_done()
+- timer(t: function)
+
+Common Records and Access Fields:
+---------------------------------
+connection:
+- c$id$orig_h # Source IP
+- c$id$resp_h # Destination IP
+- c$id$orig_p # Source port
+- c$id$resp_p # Destination port
+- c$http # HTTP data (if present)
+- c$ssl # SSL data (if present)
+- c$dns # DNS data (if present)
+
+http:
+- c$http$host
+- c$http$method
+- c$http$uri
+- c$http$user_agent
+
+ssl:
+- c$ssl$server_name
+- c$ssl$version
+- c$ssl$cert_chain
+
+dns_msg:
+- msg$qname
+- msg$qtype
+- msg$rcode
+
+File-related (fa_file):
+- f$filename
+- f$mime_type
+- f$size
+
+Common Zeek Types:
+------------------
+- addr, port, string, count, time, interval
+- table[key] of value
+- set[element]
+- vector of type
+- record {...}
