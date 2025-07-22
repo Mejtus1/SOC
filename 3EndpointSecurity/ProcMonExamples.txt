@@ -1,0 +1,203 @@
+===================================
+SIGCHECK
+
+Path | Verified | Signing Date | Publisher | Description | Version | Hash (SHA256) | Notes
+----------------------------------|----------|---------------------|------------------------------|---------------------------|--------------|------------------------------------------|-------------------------------
+C:\Windows\System32\calc.exe | Signed | 2022-11-14 13:10:22 | Microsoft Windows Publisher | Calculator Application | 10.0.19041.1 | A3D0...AB23 | ✅ Legitimate Windows binary
+C:\Program Files\Chrome\chrome.exe | Signed | 2023-06-09 10:15:42 | Google LLC | Google Chrome | 114.0.5735.199 | F9E3...1234 | ✅ Known browser, trusted signature
+C:\Temp\mimikatz.exe | Unsigned | N/A | N/A | N/A | N/A | B1F4...9999 | 🚨 Known offensive tool
+C:\Users\John\AppData\Roaming\update.exe | Unsigned | N/A | N/A | N/A | 1.0.0 | D4A3...8888 | 🚨 Suspicious file in unusual location
+C:\Windows\System32\svchost.exe | Signed | 2022-11-14 13:10:24 | Microsoft Windows Publisher | Host Process for Services | 10.0.19041.1 | EEDD...1122 | ✅ Core Windows service
+C:\ProgramData\rundll32.exe | Unsigned | N/A | N/A | Windows Host Process? | 5.0.0 | 7C3D...5566 | 🚨 Fake rundll32 in wrong directory
+C:\Tools\nc.exe | Unsigned | N/A | N/A | Netcat Reverse Shell | 1.1.0 | A55D...DEAD | 🚨 Penetration tool — flag or whitelist
+C:\Program Files\Office\winword.exe | Signed | 2023-02-10 09:44:21 | Microsoft Corporation | Microsoft Word | 2302 | B3E1...ABCD | ✅ Business app
+
+
+
+===================================
+STREAMS
+
+Scanned Directory: C:\ (recursive)
+
+File Path | Stream Name | Stream Size | Notes
+---------------------------------------------------------|--------------------|-------------|---------------------------------------------------------------
+C:\Users\John\Documents\budget.xlsx | Zone.Identifier | 26 B | ✅ Normal - Downloaded from internet (browser tag)
+C:\Users\John\Downloads\installer.msi | Zone.Identifier | 26 B | ✅ Normal - Executable from browser/email, zone data expected
+C:\Users\John\Desktop\invoice.pdf | Zone.Identifier | 26 B | ✅ Normal - Standard PDF download
+C:\Temp\winupdate.exe:payload.dll | payload.dll | 49.1 KB | 🚨 Malicious - Hidden DLL in executable (potential in-memory loader)
+C:\Temp\readme.txt:secret.vbs | secret.vbs | 8.3 KB | 🚨 Suspicious - VBS script hidden inside a text file (likely dropper)
+C:\Users\John\Music\track01.mp3:hidden.txt | hidden.txt | 2.1 KB | 🚨 Suspicious - ADS inside media file (data hiding)
+C:\Tools\nc.exe:rev_shell.ps1 | rev_shell.ps1 | 12.7 KB | 🚨 Malicious - Reverse shell payload hidden in Netcat binary
+C:\ProgramData\svc.exe:conf.dat | conf.dat | 4.4 KB | 🚨 Suspicious - Configuration for stealthy service or implant
+C:\Windows\System32\notepad.exe | (none) | N/A | ✅ Clean - No alternate data stream
+C:\Program Files\Google\Chrome\Application\chrome.exe | (none) | N/A | ✅ Clean - Legitimate signed application
+C:\Users\Public\Pictures\family.jpg:cmd.bat | cmd.bat | 1.9 KB | 🚨 Dangerous - Batch script hidden in image file (LOLBin behavior)
+C:\Users\John\Videos\movie.mp4:Zone.Identifier | Zone.Identifier | 26 B | ✅ Normal - Mark-of-the-Web from browser or transfer
+C:\Users\John\AppData\Local\Temp\random.exe:load.ps1 | load.ps1 | 10.4 KB | 🚨 Malicious - PS script inside temporary binary (likely payload loader)
+C:\Program Files\Common Files\helper.dll | (none) | N/A | ✅ Clean - No hidden stream
+
+
+===================================
+TCPVIEW
+
+log output
+normal and malicious traffic
+
+Time | Process | PID | Protocol | Local Address | Local Port | Remote Address | Remote Port | State | Note
+-------------|---------------|------|----------|----------------------|------------|----------------------|-------------|--------------|-----------------------------
+10:00:01 AM | chrome.exe | 3412 | TCP | 192.168.1.10 | 53421 | 172.217.3.110 | 443 | ESTABLISHED | ✅ Normal (Chrome to Google)
+10:00:02 AM | svchost.exe | 1180 | UDP | 192.168.1.10 | 5353 | 224.0.0.251 | 5353 | LISTENING | ✅ Normal (mDNS for discovery)
+10:00:03 AM | outlook.exe | 4452 | TCP | 192.168.1.10 | 53212 | 52.96.123.202 | 443 | ESTABLISHED | ✅ Normal (Outlook to Microsoft)
+10:00:05 AM | unknown123.exe| 7890 | TCP | 192.168.1.10 | 49152 | 185.234.219.112 | 8080 | ESTABLISHED | 🚨 Suspicious (Unknown EXE to odd IP/port)
+10:00:07 AM | powershell.exe| 8011 | TCP | 192.168.1.10 | 49201 | 203.0.113.99 | 4444 | ESTABLISHED | 🚨 Malicious (Possible reverse shell)
+10:00:08 AM | firefox.exe | 3100 | TCP | 192.168.1.10 | 53432 | 104.26.10.123 | 443 | ESTABLISHED | ✅ Normal (Browser HTTPS traffic)
+10:00:09 AM | system | 4 | TCP | 0.0.0.0 | 135 | 0.0.0.0 | 0 | LISTENING | ✅ Normal (RPC endpoint)
+10:00:10 AM | rundll32.exe | 9932 | TCP | 192.168.1.10 | 49600 | 92.123.55.17 | 80 | ESTABLISHED | 🚨 Suspicious (Unusual use of rundll32)
+
+
+
+===================================
+Autoruns
+
+Autoruns Report
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+Entry Name | Publisher | File Path | Location | Verified | Notes
+--------------------|----------------------------|--------------------------------------------------------------|------------------------------------------|----------|---------------------------------------------------------------
+Windows Defender | Microsoft Corporation | C:\Program Files\Windows Defender\MSASCui.exe | HKLM\Run | ✅ Yes | ✅ Legitimate antivirus
+Google Chrome | Google LLC | C:\Program Files\Google\Chrome\Application\chrome.exe | HKCU\Software\Microsoft\Windows\Run | ✅ Yes | ✅ Expected user browser
+Updater | Unknown Publisher | C:\Users\John\AppData\Roaming\update.exe | HKCU\Software\Microsoft\Windows\Run | ❌ No | 🚨 Suspicious EXE in Roaming with no signature
+Adobe Reader | Adobe Inc. | C:\Program Files (x86)\Adobe\Acrobat Reader\Reader.exe | HKLM\Run | ✅ Yes | ✅ Standard app
+DriverLoad | Unknown Publisher | C:\Users\Public\Driver\driverload.sys | SYSTEM\CurrentControlSet\Services | ❌ No | 🚨 Malicious driver — unauthorized kernel-level access
+RemoteAccessTask | AnyDesk Software GmbH | C:\Users\John\AppData\Roaming\AnyDesk\AnyDesk.exe | Task Scheduler | ✅ Yes | 🟡 Monitor - Unapproved remote access
+OfficeUpdate | Microsoft Corporation | C:\Program Files\Common Files\Microsoft Shared\Office... | HKLM\Run | ✅ Yes | ✅ Office auto-update
+OneDrive | Microsoft Corporation | C:\Program Files\Microsoft OneDrive\OneDrive.exe | HKCU\Run | ✅ Yes | ✅ Cloud sync client
+Printer Helper | Unknown Publisher | C:\Users\John\AppData\Local\Temp\printhelp.dll | AppInit_DLLs | ❌ No | 🚨 Malicious DLL injection on all processes
+WinRAR Registry | RARLAB | C:\Program Files\WinRAR\WinRAR.exe | HKCU\RunOnce | ✅ Yes | ✅ Normal user application
+WMI_Persistence | Unknown | wscript.exe //nologo "C:\Users\John\AppData\Local\script.vbs"| WMI Consumer Subscription | ❌ No | 🚨 Fileless persistence via WMI — critical alert
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+Flagged Entries: 4 (Updater, DriverLoad, Printer Helper, WMI_Persistence)
+Total Entries: 11
+
+
+
+
+===================================
+ProcDump
+
+ProcDump Scan Report
+
+-------------------------------------------------------------------------------------------------------
+PID | Process Name | Status | Dump Location | Reason / Notes
+------|-------------------|--------------|----------------------------------------|---------------------------------------------------------------
+1224 | svchost.exe | Dumped | C:\Dumps\svchost_1224.dmp | ✅ Normal - Baseline system process for analysis
+3310 | explorer.exe | Dumped | C:\Dumps\explorer_3310.dmp | ✅ Normal - User shell dump for context memory analysis
+4422 | msword.exe | Dumped | C:\Dumps\msword_4422.dmp | ✅ Business App - Memory dump during crash event
+5511 | unknown123.exe | Dumped | C:\Dumps\unknown123_5511.dmp | 🚨 Suspicious - Unknown process, unsigned, high CPU
+6643 | powershell.exe | Dumped | C:\Dumps\pshell_6643.dmp | 🚨 Malicious - Spawned by WMI, high entropy strings in memory
+7021 | rundll32.exe | Dumped | C:\Dumps\rundll32_7021.dmp | 🚨 Suspicious - Used to sideload DLL from AppData
+7442 | winword.exe | Dumped | C:\Dumps\winword_7442.dmp | 🟡 Monitor - User reported macro-enabled DOC file
+8123 | cmd.exe | Not Dumped | N/A | ✅ Clean - Spawned by known script, short-lived
+9011 | svchost.exe | Skipped | Access Denied (use admin rights) | ⚠️ Retry with elevated permissions
+9300 | anydesk.exe | Dumped | C:\Dumps\anydesk_9300.dmp | 🟡 Monitor - Remote access tool not approved by IT
+9870 | teamviewer.exe | Not Dumped | N/A | ✅ Legitimate - Known and signed remote support tool
+-------------------------------------------------------------------------------------------------------
+
+Dumped Files: 8
+Flagged Processes: 4
+Next Steps:
+- Load `*.dmp` files into WinDbg or PE-sieve for string, code, and IOC analysis
+- Extract embedded payloads or reflectively loaded DLLs from suspicious dumps
+- Correlate with EDR/SIEM alerts on PIDs 5511, 6643, 7021
+
+
+
+
+===================================
+Process Explorer
+
+Process Explorer Snapshot
+
+-------------------------------------------------------------------------------------------------------------------------------------
+PID | Process Name | User | Path | Verified | Description | Parent PID | Command Line | Notes
+------|-------------------|------------------|-----------------------------------------------------|-----------|------------------------------|------------|---------------------------------------------|----------------------------------------------------------
+1200 | System Idle | NT AUTHORITY\SYSTEM | N/A | N/A | Idle Process | 0 | N/A | ✅ Normal
+1224 | System | NT AUTHORITY\SYSTEM | N/A | N/A | Kernel process | 4 | N/A | ✅ Normal
+1356 | smss.exe | NT AUTHORITY\SYSTEM | C:\Windows\System32\smss.exe | ✔️ Yes | Session Manager | 1224 | smss.exe | ✅ Normal
+2150 | svchost.exe | NT AUTHORITY\SYSTEM | C:\Windows\System32\svchost.exe | ✔️ Yes | Host Process for Services | 1356 | svchost.exe -k netsvcs | ✅ Normal
+3100 | winlogon.exe | NT AUTHORITY\SYSTEM | C:\Windows\System32\winlogon.exe | ✔️ Yes | Windows Logon Application | 1224 | winlogon.exe | ✅ Normal
+4021 | explorer.exe | JOHN\user | C:\Windows\explorer.exe | ✔️ Yes | Windows Explorer Shell | 3100 | explorer.exe | ✅ Legitimate user session
+5110 | powershell.exe | JOHN\user | C:\Windows\System32\WindowsPowerShell\v1.0\... | ✔️ Yes | PowerShell Utility | 4021 | powershell -NoP -Enc <base64> | 🚨 Suspicious - Encoded payload
+5411 | rundll32.exe | JOHN\user | C:\Users\John\AppData\Local\Temp\rundll32.exe | ❌ No | Unknown (Spoofed) | 5110 | rundll32.exe ..\malicious.dll | 🚨 Malicious - DLL sideloading from Temp
+5622 | anydesk.exe | JOHN\user | C:\Users\John\AppData\Roaming\AnyDesk\anydesk.exe| ✔️ Yes | AnyDesk Remote Access | 4021 | anydesk.exe | 🟡 Monitor - Unsanctioned remote access
+5789 | conhost.exe | JOHN\user | C:\Windows\System32\conhost.exe | ✔️ Yes | Console Host | 5110 | conhost.exe 0x4 | ✅ Normal
+6011 | notepad.exe | JOHN\user | C:\Windows\System32\notepad.exe | ✔️ Yes | Notepad | 4021 | notepad.exe | ✅ User activity
+6420 | chrome.exe | JOHN\user | C:\Program Files\Google\Chrome\Application\... | ✔️ Yes | Google Chrome | 4021 | chrome.exe --type=renderer | ✅ Web browser process
+7032 | msword.exe | JOHN\user | C:\Program Files\Microsoft Office\root\Office16\| ✔️ Yes | Microsoft Word | 4021 | WINWORD.EXE | 🟡 Monitor - Suspicious macro document used
+-------------------------------------------------------------------------------------------------------------------------------------
+
+Flagged Processes: 3 (powershell.exe, rundll32.exe, anydesk.exe)
+Total Processes: 15
+
+
+
+===================================
+Process Monitor
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+PID | Process Name | User | Path | Verified | Description | Parent PID | Command Line | Notes
+------|-------------------|--------------------|----------------------------------------------------------|----------|---------------------------------|------------|--------------------------------------------------------|----------------------------------------------------------
+0000 | System Idle | NT AUTHORITY\SYSTEM| N/A | N/A | Idle Process | 0 | N/A | ✅ Normal
+0004 | System | NT AUTHORITY\SYSTEM| N/A | N/A | Kernel Process | 0 | N/A | ✅ Normal
+0200 | smss.exe | NT AUTHORITY\SYSTEM| C:\Windows\System32\smss.exe | ✔️ Yes | Session Manager Subsystem | 4 | smss.exe | ✅ Normal
+0300 | csrss.exe | NT AUTHORITY\SYSTEM| C:\Windows\System32\csrss.exe | ✔️ Yes | Client/Server Runtime Subsystem | 200 | csrss.exe | ✅ Normal
+0400 | wininit.exe | NT AUTHORITY\SYSTEM| C:\Windows\System32\wininit.exe | ✔️ Yes | Windows Initialization | 200 | wininit.exe | ✅ Normal
+0520 | services.exe | NT AUTHORITY\SYSTEM| C:\Windows\System32\services.exe | ✔️ Yes | Service Control Manager | 400 | services.exe | ✅ Normal
+0578 | svchost.exe | NT AUTHORITY\SYSTEM| C:\Windows\System32\svchost.exe | ✔️ Yes | Host Process for Services | 520 | svchost.exe -k netsvcs | ✅ Normal
+1102 | lsass.exe | NT AUTHORITY\SYSTEM| C:\Windows\System32\lsass.exe | ✔️ Yes | Local Security Authority | 400 | lsass.exe | ✅ Normal
+2020 | winlogon.exe | NT AUTHORITY\SYSTEM| C:\Windows\System32\winlogon.exe | ✔️ Yes | Logon Process | 300 | winlogon.exe | ✅ Normal
+3040 | explorer.exe | ACME\jsmith | C:\Windows\explorer.exe | ✔️ Yes | Windows Shell Experience | 2020 | explorer.exe | ✅ Legitimate user session
+3550 | outlook.exe | ACME\jsmith | C:\Program Files\Microsoft Office\root\Office16\OUTLOOK.EXE | ✔️ Yes | Outlook Email Client | 3040 | OUTLOOK.EXE | ✅ Normal
+4002 | powershell.exe | ACME\jsmith | C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe| ✔️ Yes | PowerShell Script Engine | 3040 | powershell.exe -nop -w hidden -enc <base64 string> | 🚨 Suspicious - Encoded command line
+4200 | rundll32.exe | ACME\jsmith | C:\Users\jsmith\AppData\Local\Temp\rundll32.exe | ❌ No | Unsigned DLL Loader | 4002 | rundll32.exe "C:\Temp\evil.dll",#1 | 🚨 Malicious - DLL sideloading from Temp
+4301 | putty.exe | ACME\jsmith | C:\Tools\putty.exe | ✔️ Yes | SSH Client | 3040 | putty.exe | ✅ Admin tool
+4444 | tor.exe | ACME\jsmith | C:\Users\jsmith\AppData\Roaming\tor\tor.exe | ❌ No | Tor Anonymity Service | 3040 | tor.exe | 🟡 Monitor - Possible exfiltration tunnel
+4600 | msword.exe | ACME\jsmith | C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE| ✔️ Yes | Microsoft Word | 3040 | WINWORD.EXE | 🟡 Monitor - Opened from suspicious macro email
+4750 | mimikatz.exe | ACME\jsmith | C:\Users\jsmith\Downloads\mimikatz.exe | ❌ No | Credential Extraction Tool | 4002 | mimikatz.exe privilege::debug sekurlsa::logonpasswords| 🚨 Malicious - Credential dumping
+5001 | zoom.exe | ACME\jsmith | C:\Users\jsmith\AppData\Roaming\Zoom\bin\Zoom.exe | ✔️ Yes | Zoom Video App | 3040 | zoom.exe | ✅ Normal
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Flagged Processes: 4 (powershell.exe, rundll32.exe, tor.exe, mimikatz.exe)
+Total Processes: 18
+
+
+
+
+===================================
+
+Sysmon
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Time (UTC) | Event ID | Image | User | Description | Command Line or Target | Hash (SHA256) | Notes
+-------------------|----------|------------------------|------------------|--------------------------|-------------------------------------------------------------|-------------------------------------|----------------------------------------------------------
+2025-07-12 10:23:01| 1 | C:\Windows\explorer.exe| ACME\john | Process Create | explorer.exe | 8F7F... | ✅ Normal session startup
+2025-07-12 10:24:14| 1 | C:\Windows\System32\cmd.exe | ACME\john | Process Create | cmd.exe /c powershell -nop -w hidden -enc ... | D3A2... | 🚨 Suspicious - Encoded PowerShell
+2025-07-12 10:24:15| 1 | C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe | ACME\john | Process Create | powershell -nop -enc ... | A1B4... | 🚨 Obfuscated script execution
+2025-07-12 10:24:16| 11 | rundll32.exe | ACME\john | File Created | C:\Users\john\AppData\Local\Temp\payload.dll | F0C9... | 🚨 Malware staging in Temp
+2025-07-12 10:24:17| 7 | rundll32.exe | ACME\john | Image Loaded | C:\Users\john\AppData\Local\Temp\payload.dll | F0C9... | 🚨 Malicious DLL load
+2025-07-12 10:24:18| 8 | rundll32.exe | ACME\john | CreateRemoteThread | Target: lsass.exe | N/A | 🚨 Credential dumping attempt
+2025-07-12 10:24:20| 3 | rundll32.exe | ACME\john | Network Connection | Destination: 192.168.88.130:4444 (TCP) | N/A | 🚨 C2 connection to internal IP
+2025-07-12 10:25:01| 13 | rundll32.exe | ACME\john | Registry Value Set | HKCU\Software\Microsoft\Windows\CurrentVersion\Run\evil | N/A | 🚨 Persistence established
+2025-07-12 10:26:05| 5 | rundll32.exe | ACME\john | Process Terminated | Exit code: 0x0 | N/A | 🔍 Normal termination, post-payload
+2025-07-12 10:26:30| 1 | msedge.exe | ACME\john | Process Create | msedge.exe --type=renderer | DAF1... | ✅ Normal browser activity
+2025-07-12 10:27:10| 1 | winword.exe | ACME\john | Process Create | WINWORD.EXE "invoice.docm" | A112... | 🟡 Monitor - Office macro file
+2025-07-12 10:27:11| 11 | winword.exe | ACME\john | File Created | C:\Users\john\AppData\Local\Temp\macroloader.ps1 | 7C44... | 🟡 Suspicious macro dropper
+2025-07-12 10:27:12| 1 | powershell.exe | ACME\john | Process Create | powershell -exec bypass -file macroloader.ps1 | A1B4... | 🚨 PowerShell launched via Office
+2025-07-12 10:28:50| 3 | powershell.exe | ACME\john | Network Connection | Destination: evilsite[.]com:8080 | N/A | 🚨 External beaconing
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Flagged Events: 9
+Total Events: 15
+
+===================================
