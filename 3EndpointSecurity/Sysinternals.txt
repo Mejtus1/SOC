@@ -1,0 +1,224 @@
+Sysinternals 
+
+- using cmd 
+
+------------
+installation
+
+- sysinternals can be downloaded from internet as zip with all tools inside 
+- after downloading the zip file the files need to be extracted 
+- we need to add folder path to PATH variable in order to lounch the tools via command line (without need to naviagte always to directory the tools reside in on the system) 
+- environment variables can be edited through system properties
+- system properties can be lounch through cmd using sysdm.cpl command 
+C:\Users\matus>sysdm.cpl
+- inside advanced tap at down right corner should be environment variables 
+- click on Path and edit where new window will pop up with edit environment variable -> new -> add file path to sysinternals on you system in this example it is at C:\Users\matus\Downloads\SysinternalsSuite
+- after adding file path to Path variable we can start them from cmd 
+- restart cmd in order to have Path applied properly
+C:\Users\matus>procmon
+-------------------------------------------------------
+setting up windows WebDAV, Web Client and Web Discovery
+
+- sysinternals Live is a service that enables you to execute Sysinternals tools directly from the Web without hunting for and manually downloading them
+- to launch Process Monitor from the web the syntax is \\live.sysinternals.com\tools\procmon.exe
+
+WebDav (Web Distributed Authoring and Versioning) 
+- extension of HTTP/HTTPS protocol that allows Read, write, copy, delete, and move files on remote web server
+
+WebClient
+- WebClient is Windows service that enables WebDAV and without WebClient, Windows can’t map WebDAV folder as drive (like C:)
+
+POWERSHELL: 
+PS C:\WINDOWS\system32> get-service webclient
+
+Status   Name               DisplayName
+------   ----               -----------
+Stopped  WebClient          webclient
+
+
+PS C:\WINDOWS\system32> start-service webclient
+PS C:\WINDOWS\system32> get-service webclient
+
+Status   Name               DisplayName
+------   ----               -----------
+Running  WebClient          webclient
+
+
+PS C:\WINDOWS\system32> control.exe /name Microsoft.NetworkAndSharingCenter
+
+
+
+installing Sysinternals live on Windows server 2019 
+
+
+PS C:\Users\Administrator> get-service webclient
+
+Status   Name               DisplayName
+------   ----               -----------
+Stopped  WebClient          webclient
+
+
+PS C:\Users\Administrator> start-service webclient
+PS C:\Users\Administrator> get-service webclient
+
+Status   Name               DisplayName
+------   ----               -----------
+Running  WebClient          webclient
+
+
+PS C:\Users\Administrator> control.exe /name Microsoft.NetworkAndSharingCenter
+PS C:\Users\Administrator> Install-WindowsFeature WebDAV-Redirector -Restart
+
+Success Restart Needed Exit Code      Feature Result
+------- -------------- ---------      --------------
+True    No             NoChangeNeeded {}
+
+
+PS C:\Users\Administrator> ^C
+PS C:\Users\Administrator> Get-WindowsFeature WebDAV-Redirector | Format-Table -Autosize
+
+Display Name          Name              Install State
+------------          ----              -------------
+[X] WebDAV Redirector WebDAV-Redirector     Installed
+
+
+
+-----------------------
+FIle and Disk utilities
+
+--------
+sigcheck 
+- sysinternals command line tool that shows version number, timestamp and digital signature 
+
+PS C:\Users\Administrator> sigcheck C:\Windows\System32
+
+Sigcheck v2.90 - File version and signature viewer
+Copyright (C) 2004-2022 Mark Russinovich
+Sysinternals - www.sysinternals.com
+
+Use Case: Check for unsigned files in C:\Windows\System32. 
+(A digitally signed file contains cryptographic signature that verifies who created file and ensures it hasn’t been tampered with. 
+If file is not signed, there’s no way to confirm its origin or integrity, making it potentially unsafe especially in critical folders like C:\Windows\System32. 
+Unsigned files in such locations are often red flag for malware or unauthorized modifications.}
+
+Show of procces with -e flag which checks every executable in this case in C:\Windows\System32
+c:\windows\system32\virtdisk.dll:
+        Verified:       Signed
+        Signing date:   6:30 PM 9/14/2018
+        Publisher:      Microsoft Windows
+        Company:        Microsoft Corporation
+        Description:    Virtual Disk API DLL
+        Product:        Microsoft« Windows« Operating System
+        Prod version:   10.0.17763.1
+        File version:   10.0.17763.1 (WinBuild.160101.0800)
+        MachineType:    64-bit
+c:\windows\system32\vm3dco.dll:
+        Verified:       Signed
+        Signing date:   12:09 AM 6/12/2020
+        Publisher:      VMware, Inc.
+        Company:        VMware, Inc.
+        Description:    VMware SVGA 3D Coinstaller
+        Product:        VMware SVGA 3D
+        Prod version:   8.17.01.0001 - build-16387846
+        File version:   8.17.01.0001
+        MachineType:    64-bit
+
+-u flag "If VirusTotal check is enabled, show files that are unknown by VirusTotal or have non-zero detection, otherwise show only unsigned files.
+
+-------
+Streams
+
+- streams is liked to NTFS n windows machine and shows ADS meaning additional data streams where can be added certain information or scripts
+- malware writers have used ADS to hide data in endpoints
+- as an example when file is downloaded from the internet there is written identifier in ADS that it was downloaded from the internet 
+
+PS C:\Users\Administrator> streams -accepteula
+
+streams v1.60 - Reveal NTFS alternate streams.
+Copyright (C) 2005-2016 Mark Russinovich
+Sysinternals - www.sysinternals.com
+
+usage: C:\Tools\sysint\streams.exe [-s] [-d] <file or directory>
+-s     Recurse subdirectories
+-d     Delete streams
+-nobanner
+       Do not display the startup banner and copyright message.
+
+PS C:\Users\Administrator> streams C:\Users\Administrator\Desktop\SysinternalsSuite.zip -accepteula
+
+streams v1.60 - Reveal NTFS alternate streams.
+Copyright (C) 2005-2016 Mark Russinovich
+Sysinternals - www.sysinternals.com
+
+C:\Users\Administrator\Desktop\SysinternalsSuite.zip:
+   :Zone.Identifier:$DATA       139
+
+Exercise: 
+There is a txt file on the desktop named file.txt. Using one of the three discussed tools in this task, what is the text within the ADS?
+
+- name of the hidden file is ads.txt
+
+PS C:\Users\Administrator> streams C:\Users\Administrator\Desktop\file.txt
+
+streams v1.60 - Reveal NTFS alternate streams.
+Copyright (C) 2005-2016 Mark Russinovich
+Sysinternals - www.sysinternals.com
+
+C:\Users\Administrator\Desktop\file.txt:
+         :ads.txt:$DATA 26
+PS C:\Users\Administrator> notepad C:\Users\Administrator\Desktop\file.txt:ads.txt
+I am hiding in the stream
+
+-------------------
+Networking utilites
+
+TCPView
+
+- shows detailed listing of all TCP and UDP endpoints on our system
+
+
+resmon
+
+PS C:\Users\Administrator> resmon
+
+windows has built in tool - resource monitor that can be used for this example also 
+Image PID Send (B/sec) Recieve (B/sec) Total (B/sec) 
+svchost.exe (termsvcs) 980 2.254 288 1.873 
+
+in this case termsvcs is remote desktop service (which is running because I am connected to WM) 
+
+-----------------
+Process Utilities
+
+Autoruns 
+
+- knowledge of auto-starting locations (what programs are configured to run during system bootup or login or during start-up of various applications like Internet Explorer or media player.) 
+- autoruns checks programs and drivers inside: 
+RunOnce
+Registry keys
+startup folder 
+Run 
+- it also reports: 
+explorer shell extensions
+toolbars
+browser helper objects
+Winlogon notifications
+autostart-services
+and more... 
+
+PS C:\Users\Administrator> autoruns
+
+- great tool to search for any malicious entries in machine that are trying to establish persistence 
+
+ProcDump 
+
+- cmd tool whose primary purpose is monitoring an application fro high CPU spike and generating crash dump 
+- administrator or developer can determine the cause of spike thanks to memory dump 
+
+Process Explorer
+
+- shows currently running processes 
+
+Process Monitor 
+
+- advanced monitoring tool for windows that shows real time file system, registry, process/thread activity
